@@ -1,0 +1,35 @@
+[
+{
+"id": 0,
+"round": "1",
+"category": "trivia",
+"questionMode": "multiple",
+"question": "Who was the legendary Benedictine monk who invented champagne?",
+"answers": ["Dom Chamagne","Don Johnson","Dom Pérignon","Don Bosco"],
+"solution": 2,
+"score": 10,
+"remarks": "Dom Pérignon (1638–1715) was a monk and cellar master at the Benedictine abbey in Hautvillers. He pioneered a number of winemaking techniques around 1670. He was the first to blend grapes in such a way as to improve the quality of wines, balance one element with another in order to make a better whole, and deal with a number of their imperfections. By perfecting the art of producing clear white wines from black grapes by clever manipulation of the presses he enhancing the tendency of Champagne wines to retain their natural sugar in order to naturally induce secondary fermentation in the spring. He was a master at deciding when to bottle these wines in order to capture the bubble. He also introduced corks (instead of wood), which were fastened to bottles with hemp string soaked in oil in order to keep the wines fresh and sparkling, and used thicker glass in order to strengthen the bottles (which were prone to explode at that time). The development of sparkling wines as the main style of production in Champagne occurred progressively in the 19th century, more than a century after Dom Pérignon's death."
+},
+{
+"id": 1,
+"round": "1",
+"category": "geography",
+"questionMode": "multiple",
+"question": "Name the largest freshwater lake in the world?",
+"answers": ["Lake Superior","Lake Inferior","Lake Maximus","Lake Victoria"],
+"solution": 0,
+"score": 10,
+"remarks": "Lake Superior (French: lac Supérieur, the largest of the Great Lakes of North America, is also the world's largest freshwater lake by surface area, and the third largest freshwater lake by volume. It is shared by the Canadian province of Ontario to the north, the U.S. state of Minnesota to the west, and Wisconsin and the Upper Peninsula of Michigan to the south."
+},
+{
+"id": 2,
+"round": "1",
+"category": "politics",
+"questionMode": "buzzer",
+"question": "Give Trump's first name.",
+"answers": ["Donald"],
+"solution": 0,
+"score": 50,
+"remarks": "Donald John Trump (born June 14, 1946) is the 45th and current president of the United States. Before entering politics, he was a businessman and television personality."
+}
+]

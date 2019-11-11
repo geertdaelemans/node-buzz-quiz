@@ -1,0 +1,36 @@
+{
+  "name": "node-buzz",
+  "version": "1.0.0",
+  "description": "Driver for 'Buzz!' for PlayStation 2 controllers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"start": "node example"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thelmgn/buzz.git"
+  },
+  "keywords": [
+    "buzz",
+    "playstation2",
+    "usb",
+    "hid",
+    "game",
+    "game-controller",
+    "controller"
+  ],
+  "author": "theLMGN",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/thelmgn/buzz/issues"
+  },
+  "homepage": "https://github.com/thelmgn/buzz#readme",
+  "dependencies": {
+    "ejs": "^2.7.1",
+    "express": "^4.17.1",
+    "node-hid": "^0.7.9",
+    "nodemon": "^1.19.4",
+    "socket.io": "^2.3.0"
+  }
+}

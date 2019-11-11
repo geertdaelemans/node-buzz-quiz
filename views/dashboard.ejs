@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quiz Dashboard</title>
+    <meta http-equiv="Content-Type" const="text/html;charset=UTF-8" />
+    <link href="http://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="style.css" >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+
+  </head>
+
+  <body>
+    <header class="header">
+      <h1>Videotechnologie QUIZ</h1>
+    </header>
+	
+	<section id="control" class="control">
+	  <button id="scoreboard" type="button">Scoreboard</button>
+	  <button id="addScores" type="button">Add Scores</button>
+	  <button id="buttonStart" type="button">Start</button>	  
+	  <input type="checkbox" id="flashing" />
+	  <label for="flashing">Flashing</label>  
+	  <fieldset>
+	    <legend>Current Question</legend>
+		<input type="hidden" id="id" value="0" />
+		<label for="title">Title:</label>
+		<input type="text" id="title" class="playerName" />
+		<label for="question">Question:</label>
+		<input type="text" id="question" class="playerName" /><br/>
+		<label for="round">Round:</label>
+		<input type="text" id="round" class="playerName" /><br/>
+		<label for="category">Category:</label>
+		<input type="text" id="category" class="playerName" /><br/>
+		<label for="questionmode">Mode:</label><br/>
+	    <select id="questionmode">
+		  <option value="multiple">Multiple-choice</option>
+		  <option value="buzzer">Buzzer</option>
+	    </select><br/>
+		<label>Answers:</label>
+		<div class="answerWrapper">
+		  <input type="radio" name="questionanswer" value="blue" class="radio">
+		  <input type="text" id="answerBlue" class="answer blue" />
+		</div>
+		<div class="answerWrapper">
+		  <input type="radio" name="questionanswer" value="orange" class="radio">
+		  <input type="text" id="answerOrange" class="answer orange" />
+		</div>
+		<div class="answerWrapper">
+		  <input type="radio" name="questionanswer" value="green" class="radio">
+		  <input type="text" id="answerGreen" class="answer green" />
+		</div>
+		<div class="answerWrapper">
+		  <input type="radio" name="questionanswer" value="yellow" class="radio">
+		  <input type="text" id="answerYellow" class="answer yellow" />
+		</div>
+		<label for="questionscore">Score:</label><br/>
+		<input type="text" id="questionscore" /><br/>
+		<label for="remarks">Remarks:</label><br/>
+		<textarea id="remarks" rows="5" class="textArea"></textarea><br/>
+		<button id="previousQuestion" type="button">&lt;</button>
+		<button id="updateQuestion" type="button">Update</button>
+		<button id="nextQuestion" type="button">&gt;</button>
+      </fieldset>
+	</section>
+	
+	<section id="panels" class="container">
+	</section>
+	
+	<section id="questions">
+	</section>
+
+    <section>
+      <div id="change_username">
+	    <input id="username" type="text" />
+	    <button id="send_username" type="button">Change username</button>
+      </div>
+    </section>
+
+    <section id="chatroom">
+      <section id="feedback"></section>
+    </section>
+
+    <section id="input_zone"> 
+      <input id="message" class="vertical-align" type="text" />
+      <button id="send_message" class="vertical-align" type="button">Send</button>
+    </section>
+
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

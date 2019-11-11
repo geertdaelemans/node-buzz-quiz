@@ -1,0 +1,177 @@
+@mixin vertical-align {
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0px;
+    height: 100%;
+}
+
+header {
+    text-align: center;
+}
+
+h1 {
+    font-family: 'Comfortaa', sans-serif;
+    margin: 0px;
+}
+
+div#change_username, section#input_zone {
+/*    border: 5px outset #8258FA;*/
+}
+
+div#change_username {
+    height: 3%;
+    display: inline-block;
+	padding: 5px;
+}
+
+section#chatroom {
+/*    border: 5px inset #8258FA;*/
+    border-style: solid;
+    border-width: 1px;
+    height: 30%;
+    overflow: auto;
+	margin: 5px;
+}
+
+section#input_zone {
+    height: 7%;
+    text-align: center;
+/*    background-color: #BCA9F5;*/
+}
+
+input#username {
+    font-family: 'Comfortaa', sans-serif;
+}
+
+input#message {
+    display: inline-block;
+    width: 88%;
+    height: 70%;
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 2vh;
+}
+
+button#send_message {
+    display: inline-block;
+    height: 70%;
+    width: 10%;
+}
+
+.header {
+  padding: 60px;
+  text-align: center;
+  background: #1abc9c;
+  color: white;
+  font-size: 30px;
+}
+
+.control {
+  margin: 5px;
+}
+
+p.message {
+    margin: 0px;
+    width: 100%;
+    height: 40px;
+    font-size: 2vh;
+    font-family: 'Comfortaa', sans-serif;
+    padding: 1vh;
+}
+
+.message:nth-child(even) {
+    background-color: #81DAF5;
+}
+
+.message:nth-child(odd) {
+    background-color: #81BEF7;
+}
+
+.container {
+	margin: 0px;
+    display: grid;
+	height: 100%;
+    grid-template-columns:  1fr 1fr 1fr;
+    grid-template-rows:  1fr 1fr 1fr;
+}
+
+.player {
+  text-align: center;
+  border-style: dashed;
+  border-width: 1px;
+  padding: 5px;
+}
+
+.playerName {
+	height: 25%;
+	padding: 5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: #1abc9c;
+	color: white;
+	font-weight: bold;
+    font-size: 30px;
+	font-family: 'Comfortaa', sans-serif;
+    margin: 0px;
+}
+
+.playerField, .score, .scoreDelta, .scoreWrapper, .statusWrapper {
+	height: 75%;
+    margin: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: bold;
+    font-size: 100px;
+	font-family: 'Comfortaa', sans-serif;
+}
+
+.playerRank {
+	font-weight: bold;
+    font-size: 200px;
+	font-family: 'Comfortaa', sans-serif;
+    margin: 0px;	
+}
+
+.counter {
+	border-style: dashed;
+	border-width: 1px;
+	padding: 5px;
+	height: 100%;
+    margin: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: bold;
+    font-size: 40px;
+	font-family: 'Comfortaa', sans-serif;
+	text-align: center;
+}
+
+.scoreWrapper {
+    overflow: hidden; /* will contain if #first is longer than #second */	
+}
+.score {
+	height: 100%;
+	width: 100%;
+    float:left; /* add this */
+}
+.scoreDelta {
+	height: 100%;
+	width: 50%;
+    overflow: hidden; /* if you don't want #second to wrap below #first */
+}
