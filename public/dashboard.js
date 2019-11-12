@@ -131,7 +131,7 @@ function setupPage() {
 		$("#panels").append('<div id="player_' + i + '" class="player"></div>')
 		
 		// Name of the player
-		$("#player_" + i).append('<input type="text" id="name_' + i + '" class="playerName" name ="' + i + '"/>')
+		$("#player_" + i).append('<input type="text" id="name_' + i + '" class="playerName" name="' + i + '"/>')
 		$("#name_" + i).bind("keyup", function(){
 			var value = $(this).val()
 			var name = $(this).attr('name')
@@ -262,7 +262,15 @@ socket.on('questions', function(questions) {
 		if($('#question_' + i).length) {
 			$('#question_' + i).html(question.question)
 		} else {
-			$("#questions").append('<p id="question_' + i + '" class="question">' + question.question + '</p>')
+			$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.question + '</p>')
+			$('#question_' + i ).click(function() {
+				$('.question:nth-child(even)').css("background-color", "#81DAF5")
+				$('.question:nth-child(odd)').css("background-color", "#81BEF7")
+				$(this).css('background-color', 'green')
+				let name = $(this).attr('name')
+				state.currentQuestion = questions[name]
+				socket.emit('updateStatus', state)
+			})
 		}
 	}
 	state.currentQuestion = questions[id]
