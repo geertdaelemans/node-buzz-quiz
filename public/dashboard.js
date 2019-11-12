@@ -102,24 +102,12 @@ $(function(){
 	
 	// Next question
 	$("#nextQuestion").click(function() {
-		if(state.currentQuestion.id == questionsList.length - 1) {
-			state.currentQuestion = questionsList[0]
-		} else {
-			state.currentQuestion = questionsList[++state.currentQuestion.id]
-		}
-		state.title = ""
-		socket.emit('updateStatus', state)
+		socket.emit('nextQuestion')
 	})
 	
 	// Previous question
 	$("#previousQuestion").click(function() {
-		if(state.currentQuestion.id == 0) {
-			state.currentQuestion = questionsList[questionsList.length - 1]
-		} else {
-			state.currentQuestion = questionsList[--state.currentQuestion.id]
-		}
-		state.title = ""
-		socket.emit('updateStatus', state)
+		socket.emit('previousQuestion')
 	})
 });
 
@@ -253,16 +241,17 @@ socket.on("new_message", function(data) {
 })
 
 socket.on('questions', function(questions) {
+	let id = state.currentQuestion.id
 	questionsList = questions
 	for(let i = 0; i < questions.length; i++) {
 		question = questions[i]
-		if($('question_' + i ).length) {
-			$('question_' + i ).html(question.question)
+		if($('#question_' + i).length) {
+			$('#question_' + i).html(question.question)
 		} else {
 			$("#questions").append('<p id="question_' + i + '" class="question">' + question.question + '</p>')
 		}
 	}
-	state.currentQuestion = questions[0]
+	state.currentQuestion = questions[id]
 	socket.emit('updateStatus', state)
 	console.log("length", questionsList.length)
 })

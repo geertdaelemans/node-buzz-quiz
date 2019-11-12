@@ -128,6 +128,10 @@ function refreshPage() {
 			$("#counter").html("<h1>" + state.title + "<br/>Multiple<br/>Choice</h1>")
 			$(".scoreWrapper").hide()
 			break
+		case "multifirst":
+			$("#counter").html("<h1>" + state.title + "<br/>Multiple Snelste<br/>Choice</h1>")
+			$(".scoreWrapper").hide()
+			break
 		case "buzzer":
 			$("#counter").html("<h1>" + state.title + "<br/>Buzzer</h1>")
 			$(".scoreWrapper").hide()
@@ -160,6 +164,7 @@ function refreshPage() {
 				}
 				break
 			case "multiple":
+			case "multifirst":
 				if(state.questionActive) {
 					$("#status_"+i).css({backgroundColor: "white"})
 					if (state.selectedButtons[i] != "none") {

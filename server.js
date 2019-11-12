@@ -162,7 +162,29 @@ io.on('connection', function(socket) {
 		questions[state.currentQuestion.id] = state.currentQuestion
 		storeData(questions, "questions.txt")
 		io.emit('questions', questions);
-	})	
+	})
+
+	// Next question
+	socket.on("nextQuestion", function() {
+		let index = 0
+		if(state.currentQuestion.id < questions.length - 1) {
+			index = state.currentQuestion.id + 1
+		}
+		state.currentQuestion = questions[index]
+		state.title = ""
+		sendStatus()
+	})
+	
+	// Previous question
+	socket.on("previousQuestion", function() {
+		let index = questions.length - 1
+		if(state.currentQuestion.id > 0) {
+			index = state.currentQuestion.id - 1
+		}
+		state.currentQuestion = questions[index]
+		state.title = ""
+		sendStatus()
+	})
 })
 
 // Routes
@@ -236,6 +258,7 @@ function sendStatus(clientID) {
 function startQuestion() {
 	switch(state.questionMode) {
 		case "multiple":
+		case "multifirst":
 			state.flashing = false
 			state.questionActive = true
 			break;
@@ -296,6 +319,8 @@ buzz.on("buttondown",function(event) {
 	util.log(`${playerName} pushed ${event.button}`)
 	io.sockets.emit('new_message', {message : event.button, username : playerName, playerId : playerNumber})
 	switch(state.questionMode) {
+		
+		// Simple multiple choice questions (no limits)
 		case "multiple":
 			// Player pushed multiple choice button once
 			if(state.selectedButtons[event.controllerId] == "none" &&
@@ -312,6 +337,27 @@ buzz.on("buttondown",function(event) {
 				sendStatus()
 			}
 			break
+		
+		// Multiple choice, only fastest correct answer counts
+		case "multifirst":
+			// Player pushed multiple choice button once
+			if(state.questionActive == true &&
+			   state.selectedButtons[event.controllerId] == "none" &&
+			   event.button != "red") {
+				state.selectedButtons[event.controllerId] = event.button
+				state.numberOfReplies++
+				state.speedSequence[event.controllerId] = state.numberOfReplies
+				if(event.button == colorCode[state.currentQuestion.solution]) {
+					state.correct[event.controllerId] = true
+					state.scoresDelta[event.controllerId] = state.currentQuestion.score
+					state.questionActive = false
+				}
+				state.lightState[event.controllerId] = true
+				buzz.light(state.lightState)
+				sendStatus()
+			}
+			break		
+		
 		case "buzzer":
 			// Player pushed red button once
 			if(state.selectedButtons[event.controllerId] == "none" &&
