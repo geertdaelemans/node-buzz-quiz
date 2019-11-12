@@ -100,6 +100,20 @@ $(function(){
 		socket.emit('updateQuestion')
 	})
 	
+	//
+	$("#newQuestion").click(function() {
+		state.currentQuestion.question = $("#question").val()
+		state.currentQuestion.round = $("#round").val()
+		state.currentQuestion.category = $("#category").val()
+		state.currentQuestion.questionMode = $("#questionmode").val()
+		state.currentQuestion.answers = [$("#answerBlue").val(), $("#answerOrange").val(), $("#answerGreen").val(), $("#answerYellow").val()]
+		state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
+		state.currentQuestion.score = $("#questionscore").val()
+		state.currentQuestion.remarks = $("#remarks").val()
+		socket.emit('updateStatus', state)
+		socket.emit('newQuestion')
+	})
+	
 	// Next question
 	$("#nextQuestion").click(function() {
 		socket.emit('nextQuestion')

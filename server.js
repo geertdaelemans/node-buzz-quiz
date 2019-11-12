@@ -153,16 +153,25 @@ io.on('connection', function(socket) {
 	
 	// Request questions
 	socket.on("getQuestions", function() {
-		io.to(socket.id).emit('questions', questions);
+		io.to(socket.id).emit('questions', questions)
 	})
 	
 	// Update question
 	socket.on("updateQuestion", function() {
-		util.log("Update received")
 		questions[state.currentQuestion.id] = state.currentQuestion
 		storeData(questions, "questions.txt")
-		io.emit('questions', questions);
+		io.emit('questions', questions)
+		util.log("Updated question " + (state.currentQuestion.id + 1) + ".")
 	})
+	
+	// Add a new question
+	socket.on("newQuestion", function() {
+		state.currentQuestion.id = questions.length
+		questions.push(state.currentQuestion)
+		storeData(questions, "questions.txt")
+		io.emit('questions', questions)
+		util.log("Added new question.")
+	})	
 
 	// Next question
 	socket.on("nextQuestion", function() {
