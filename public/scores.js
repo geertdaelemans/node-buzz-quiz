@@ -125,15 +125,19 @@ function refreshPage() {
 			$(".scoreWrapper").show()
 			break
 		case "multiple":
-			$("#counter").html("<h1>" + state.title + "<br/>Multiple<br/>Choice</h1>")
+			$("#counter").html("<h1>" + state.title + "<br/>Multiple Choice</h1>")
 			$(".scoreWrapper").hide()
 			break
 		case "multifirst":
-			$("#counter").html("<h1>" + state.title + "<br/>Multiple Snelste<br/>Choice</h1>")
+			$("#counter").html("<h1>" + state.title + "<br/>Snelste<br/>Multiple Choice</h1>")
 			$(".scoreWrapper").hide()
 			break
 		case "buzzer":
 			$("#counter").html("<h1>" + state.title + "<br/>Buzzer</h1>")
+			$(".scoreWrapper").hide()
+			break
+		case "inorder":
+			$("#counter").html("<h1>" + state.title + "<br/>In Volgorde</h1>")
 			$(".scoreWrapper").hide()
 			break
 		default:
@@ -164,11 +168,35 @@ function refreshPage() {
 				}
 				break
 			case "multiple":
-			case "multifirst":
 				if(state.questionActive) {
 					$("#status_"+i).css({backgroundColor: "white"})
 					if (state.selectedButtons[i] != "none") {
 						displayStatus(i, "ok")
+					} else {
+						displayStatus(i, "waiting")					
+					}
+				} else {
+					if (state.selectedButtons[i] != "none") {
+						$("#status_"+i).css({backgroundColor: state.selectedButtons[i]})
+					} else {
+						$("#status_"+i).css({backgroundColor: "white"})
+					}
+					if(state.selectedButtons[i] == "none") {
+						displayStatus(i, "neutral")
+					} else {
+						displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
+					}
+				}
+				break
+			case "multifirst":
+				if(state.questionActive) {
+					$("#status_"+i).css({backgroundColor: "white"})
+					if (state.selectedButtons[i] != "none") {
+						if(state.selectedButtons[i] == state.solution) {
+							displayStatus(i, "correct")
+						} else {
+							displayStatus(i, "wrong")
+						}
 					} else {
 						displayStatus(i, "waiting")					
 					}

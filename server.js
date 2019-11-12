@@ -286,11 +286,10 @@ function startQuestion() {
 	switch(state.questionMode) {
 		case "multiple":
 		case "multifirst":
-			state.flashing = false
-			state.questionActive = true
-			break;
+		case "inorder":
 		case "buzzer":
 			state.flashing = false
+			allLights(true)
 			state.questionActive = true
 			break;
 		default:
@@ -303,6 +302,7 @@ function startQuestion() {
 function evaluateQuestion() {
 	switch(state.questionMode) {
 		case "multiple":
+		case "inorder":
 			state.flashing = false
 			state.questionActive = false
 			for(i = 0; i < state.numberOfPlayers; i++) {
@@ -310,7 +310,7 @@ function evaluateQuestion() {
 					state.scoresDelta[i] = state.currentQuestion.score
 				}
 			}
-			break;
+			break
 		case "buzzer":
 			state.flashing = false
 			state.questionActive = false
@@ -319,7 +319,11 @@ function evaluateQuestion() {
 					state.scoresDelta[i] = state.currentQuestion.score
 				}
 			}
-			break;
+			break
+		case "multifirst":
+			state.flashing = false
+			state.questionActive = false
+			break
 		default:
 	}
 	sendStatus()
@@ -339,6 +343,13 @@ function resetQuestion() {
 	storeData(state, "latestStatus.txt")
 }
 
+// All lights on
+function allLights(onOff) {
+	for (i = 0; i < state.numberOfPlayers; i++) {
+		state.lightState[i] = onOff
+	}
+}
+
 // Light controllers with a button pressed down
 buzz.on("buttondown",function(event) {
 	var playerNumber = parseInt(event.controllerId) + 1
@@ -352,16 +363,28 @@ buzz.on("buttondown",function(event) {
 			// Player pushed multiple choice button once
 			if(state.selectedButtons[event.controllerId] == "none" &&
 			   event.button != "red") {
+				   
+				// Register pushed button
 				state.selectedButtons[event.controllerId] = event.button
 				state.numberOfReplies++
 				state.speedSequence[event.controllerId] = state.numberOfReplies
+				
+				// Player has submitted answer, which is instantly evaluated
 				if(event.button == colorCode[state.currentQuestion.solution]) {
 					state.correct[event.controllerId] = true
 					state.scoresDelta[event.controllerId] = state.currentQuestion.score
 				}
-				state.lightState[event.controllerId] = true
-				buzz.light(state.lightState)
+				
+				// Turn red light off
+				state.lightState[event.controllerId] = false
+				
+				// Update status 
 				sendStatus()
+				
+				// All players have submitted their answer
+				if(state.numberOfReplies == state.numberOfPlayers) {
+					evaluateQuestion()
+				}
 			}
 			break
 		
@@ -371,32 +394,73 @@ buzz.on("buttondown",function(event) {
 			if(state.questionActive == true &&
 			   state.selectedButtons[event.controllerId] == "none" &&
 			   event.button != "red") {
+				
+				// Register pushed button
 				state.selectedButtons[event.controllerId] = event.button
 				state.numberOfReplies++
 				state.speedSequence[event.controllerId] = state.numberOfReplies
+				
+				// One player has submitted a correct answer and all stops
 				if(event.button == colorCode[state.currentQuestion.solution]) {
 					state.correct[event.controllerId] = true
 					state.scoresDelta[event.controllerId] = state.currentQuestion.score
-					state.questionActive = false
+					evaluateQuestion()
 				}
-				state.lightState[event.controllerId] = true
-				buzz.light(state.lightState)
+				
+				// Turn red light off
+				state.lightState[event.controllerId] = false
+				
+				// Update status
 				sendStatus()
+				
+				// All players have submitted their answer, all are wrong
+				if(state.numberOfReplies == state.numberOfPlayers) {
+					evaluateQuestion()
+				}
 			}
 			break		
 		
 		case "buzzer":
 			// Player pushed red button once
-			if(state.selectedButtons[event.controllerId] == "none" &&
+			if(state.questionActive == true &&
+			   state.selectedButtons[event.controllerId] == "none" &&
 			   event.button == "red") {
+				   
+				// Register pushed button
 				state.selectedButtons[event.controllerId] = "red"
 				state.numberOfReplies++
 				state.speedSequence[event.controllerId] = state.numberOfReplies
-				state.lightState[event.controllerId] = true
-				buzz.light(state.lightState)
+				
+				// First player to push leaves the red light on
+				if(state.numberOfReplies == 1) {
+					allLights(false)
+					state.lightState[event.controllerId] = true
+					console.log(state.lightState)
+				}
+				
+				// Update status 
 				sendStatus()				
 			}
 			break
+			
+		// Set in order, a sequence of four unique buttons needs to be pushed
+		case "inorder":
+			if(state.questionActive == true &&
+			   event.button != "red" &&
+			   state.selectedButtons[event.controllerId].indexOf(event.button) == -1) {
+				if(state.selectedButtons[event.controllerId] == "none") {
+					state.selectedButtons[event.controllerId] = event.button
+				} else {
+					state.selectedButtons[event.controllerId] = state.selectedButtons[event.controllerId] + "-" + event.button
+				}
+				if(state.selectedButtons[event.controllerId].length == 24) {
+					state.lightState[event.controllerId] = false
+				}
+				sendStatus()
+				util.log("Player " + (event.controllerId + 1) + " - " + state.selectedButtons[event.controllerId] + ".")
+			}
+			break
+		
 		default:
 			state.selectedButtons[event.controllerId] = event.button
 			state.lightState[event.controllerId] = true
@@ -407,7 +471,14 @@ buzz.on("buttondown",function(event) {
 
 // Button released, just for switching off the LED's
 buzz.on("buttonup",function(event) {
-    state.lightState[event.controllerId] = false
+	switch(state.questionMode) {
+		case "multiple":
+		case "buzzer":
+		case "inorder":
+			break
+		default:
+			state.lightState[event.controllerId] = false
+	}
     buzz.light(state.lightState)
 	sendStatus()
 })
