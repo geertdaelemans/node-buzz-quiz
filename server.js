@@ -171,6 +171,24 @@ io.on('connection', function(socket) {
 		storeData(questions, "questions.txt")
 		io.emit('questions', questions)
 		util.log("Added new question.")
+	})
+
+	// Move question to position
+	socket.on("moveTo", function(msg) {
+		if (msg >= 0 && msg < questions.length) {
+			util.log("Moved question", (state.currentQuestion.id + 1), "to position", (msg + 1), ".")
+			questions.splice(state.currentQuestion.id, 1)
+			questions.splice(msg, 0, state.currentQuestion)
+			let index = 0
+			// Renumber the questions
+			for(let i = 0; i < questions.length; i++) {
+				questions[i].id = i
+			}
+			storeData(questions, "questions.txt")
+			state.currentQuestion.id = msg
+			sendStatus()
+			io.emit('questions', questions)
+		}
 	})	
 
 	// Next question

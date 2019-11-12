@@ -114,6 +114,21 @@ $(function(){
 		socket.emit('newQuestion')
 	})
 	
+	// Move to
+	$("#moveSelected").click(function() {
+		socket.emit('moveTo', (parseInt($('#moveTo').val()) - 1))
+	})
+	
+	$('#moveTo').on('keypress',function(e) {
+		if(e.which == 13) {
+			socket.emit('moveTo', (parseInt($('#moveTo').val()) - 1))
+		}
+	})
+	
+	$('#moveTo').on('change',function(e) {
+		socket.emit('moveTo', (parseInt($('#moveTo').val()) - 1))
+	})
+	
 	// Next question
 	$("#nextQuestion").click(function() {
 		socket.emit('nextQuestion')
@@ -268,7 +283,7 @@ socket.on('questions', function(questions) {
 	for(let i = 0; i < questions.length; i++) {
 		question = questions[i]
 		if($('#question_' + i).length) {
-			$('#question_' + i).html(question.question)
+			$('#question_' + i).html((i + 1) + ' - ' + question.question)
 		} else {
 			$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.question + '</p>')
 			$('#question_' + i ).click(function() {
