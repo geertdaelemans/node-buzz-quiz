@@ -179,6 +179,13 @@ function setupPage() {
 	refreshPage()
 }
 
+// Select question in list
+function selectQuestion(index) {
+	$('.question:nth-child(even)').css("background-color", "#81DAF5")
+	$('.question:nth-child(odd)').css("background-color", "#81BEF7")
+	$('#question_' + index).css('background-color', 'green')
+}
+
 // Refresh the dashboard page
 function refreshPage() {
 	$("#flashing").prop("checked", state.flashing)
@@ -236,6 +243,7 @@ function refreshPage() {
 	} else {
 		$("#buttonStart").html('Start')
 	}
+	selectQuestion(state.currentQuestion.id)
 }
 
 socket.on('status', function(msg) {
@@ -264,11 +272,9 @@ socket.on('questions', function(questions) {
 		} else {
 			$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.question + '</p>')
 			$('#question_' + i ).click(function() {
-				$('.question:nth-child(even)').css("background-color", "#81DAF5")
-				$('.question:nth-child(odd)').css("background-color", "#81BEF7")
-				$(this).css('background-color', 'green')
 				let name = $(this).attr('name')
-				state.currentQuestion = questions[name]
+				selectQuestion(name)
+				state.currentQuestion = questionsList[name]
 				socket.emit('updateStatus', state)
 			})
 		}
