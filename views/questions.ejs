@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quiz Questions</title>
+    <meta http-equiv="Content-Type" const="text/html;charset=UTF-8" />
+    <link href="http://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="questionsStyle.css" >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+  </head>
+
+  <body>
+  
+ 	<!-- Section for open questions --> 
+ 	<section id="singlePanel" class="singleContainer">
+		<div id="questionSingle" class="question"></div>
+	</section> 
+
+	<!-- Section for multiple choice questions -->
+	<section id="multiplePanel" class="multipleContainer">
+		<div id="questionMultiple" class="question"></div>
+		<div id="answerBlue" class="answer blue"></div>
+		<div id="answerOrange" class="answer orange"></div>
+		<div id="answerGreen" class="answer green"></div>
+		<div id="answerYellow" class="answer yellow"></div>	
+	</section>
+	
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="questions.js"></script>
+  </body>
+</html>

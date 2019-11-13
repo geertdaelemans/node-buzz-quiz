@@ -227,6 +227,10 @@ app.get('/', (req, res) => {
 	res.render('scores')
 })
 
+app.get('/questions', (req, res) => {
+	res.render('questions')
+})
+
 // Initialize Buzz controllers
 const buzz = new Buzz({});
 state.numberOfPlayers = buzz.getNumberOfControllers();
