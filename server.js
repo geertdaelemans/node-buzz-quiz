@@ -318,9 +318,17 @@ function evaluateQuestion() {
 		case "buzzer":
 			state.flashing = false
 			state.questionActive = false
-			for(i = 0; i < state.numberOfPlayers; i++) {
-				if(state.correct[i]) {
-					state.scoresDelta[i] = state.currentQuestion.score
+			for(let i = 1; i <= state.numberOfPlayers; i++) {
+				let playerIndex = state.speedSequence.indexOf(i)
+				if(playerIndex != -1) {
+					if(state.correct[playerIndex]) {
+						state.scoresDelta[playerIndex] = parseInt(state.currentQuestion.score)
+						break
+					} else {
+						state.scoresDelta[playerIndex] = -parseInt(state.currentQuestion.scoreMinus)
+					}
+				} else {
+					break
 				}
 			}
 			break
@@ -372,7 +380,7 @@ buzz.on("buttondown",function(event) {
 				// Player has submitted answer, which is instantly evaluated
 				if(event.button == colorCode[state.currentQuestion.solution]) {
 					state.correct[event.controllerId] = true
-					state.scoresDelta[event.controllerId] = state.currentQuestion.score
+					state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
 				}
 				
 				// Turn red light off
@@ -403,7 +411,7 @@ buzz.on("buttondown",function(event) {
 				// One player has submitted a correct answer and all stops
 				if(event.button == colorCode[state.currentQuestion.solution]) {
 					state.correct[event.controllerId] = true
-					state.scoresDelta[event.controllerId] = state.currentQuestion.score
+					state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
 					evaluateQuestion()
 				}
 				
@@ -435,7 +443,6 @@ buzz.on("buttondown",function(event) {
 				if(state.numberOfReplies == 1) {
 					allLights(false)
 					state.lightState[event.controllerId] = true
-					console.log(state.lightState)
 				}
 				
 				// Update status 
@@ -460,7 +467,7 @@ buzz.on("buttondown",function(event) {
 				if(state.selectedButtons[event.controllerId].length == 24) {
 					if(state.selectedButtons[event.controllerId] == state.currentQuestion.solutionOrder) {
 						state.correct[event.controllerId] = true
-						state.scoresDelta[event.controllerId] = state.currentQuestion.score
+						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
 					}
 					state.lightState[event.controllerId] = false
 					state.numberOfReplies++
