@@ -165,6 +165,7 @@ p.message {
 .scoreWrapper {
     overflow: hidden; /* will contain if #first is longer than #second */	
 }
+
 .score {
 	height: 100%;
 	width: 100%;
@@ -174,4 +175,19 @@ p.message {
 	height: 100%;
 	width: 50%;
     overflow: hidden; /* if you don't want #second to wrap below #first */
+}
+
+.orderWrapper {
+	height: 75%;
+    overflow: hidden; /* will contain if #first is longer than #second */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.order {
+	width: 25%;
+	height: 25%;
+	border-radius: 25px;
+	float: left;
 }

@@ -45,7 +45,11 @@ var question = {
 	question: 'empty',
 	answers: [],
 	solution: 0,
+	solutionOrder: "blue-orange-green-yellow",
+	solutionBuzzer: "none",
 	score: 0,
+	scoreMinus: 0,
+	scoreArray: [],
 	remarks: 'none'
 }
 
@@ -302,14 +306,10 @@ function startQuestion() {
 function evaluateQuestion() {
 	switch(state.questionMode) {
 		case "multiple":
+		case "multifirst":
 		case "inorder":
 			state.flashing = false
 			state.questionActive = false
-			for(i = 0; i < state.numberOfPlayers; i++) {
-				if(state.correct[i]) {
-					state.scoresDelta[i] = state.currentQuestion.score
-				}
-			}
 			break
 		case "buzzer":
 			state.flashing = false
@@ -319,10 +319,6 @@ function evaluateQuestion() {
 					state.scoresDelta[i] = state.currentQuestion.score
 				}
 			}
-			break
-		case "multifirst":
-			state.flashing = false
-			state.questionActive = false
 			break
 		default:
 	}
@@ -448,15 +444,32 @@ buzz.on("buttondown",function(event) {
 			if(state.questionActive == true &&
 			   event.button != "red" &&
 			   state.selectedButtons[event.controllerId].indexOf(event.button) == -1) {
+				   
+				// Register series of pushed buttons
 				if(state.selectedButtons[event.controllerId] == "none") {
 					state.selectedButtons[event.controllerId] = event.button
 				} else {
 					state.selectedButtons[event.controllerId] = state.selectedButtons[event.controllerId] + "-" + event.button
 				}
+				
+				// Check if sequence of player inputs is complete and validate question
 				if(state.selectedButtons[event.controllerId].length == 24) {
+					if(state.selectedButtons[event.controllerId] == state.currentQuestion.solutionOrder) {
+						state.correct[event.controllerId] = true
+						state.scoresDelta[event.controllerId] = state.currentQuestion.score
+					}
 					state.lightState[event.controllerId] = false
+					state.numberOfReplies++
 				}
+				
+				// Update status
 				sendStatus()
+				
+				// All players have submitted their answer, all are wrong
+				if(state.numberOfReplies == state.numberOfPlayers) {
+					evaluateQuestion()
+				}
+				
 				util.log("Player " + (event.controllerId + 1) + " - " + state.selectedButtons[event.controllerId] + ".")
 			}
 			break

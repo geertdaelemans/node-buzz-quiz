@@ -11,7 +11,11 @@ var question = {
 	question: 'empty',
 	answers: [],
 	solution: 0,
+	solutionOrder: "blue-orange-green-yellow",
+	solutionBuzzer: "none",
 	score: 0,
+	scoreMinus: 0,
+	scoreArray: [],
 	remarks: 'none'
 }
 
@@ -100,6 +104,9 @@ function setupPage() {
 		$("#score_"+i).hide()
 		$("#delta_"+i).hide()
 		
+		// Order
+		$("#player_"+i).append('<div class="orderWrapper"><div id="order0_' + i + '" class="order"></div><div id="order1_' + i + '" class="order"></div><div id="order2_' + i + '" class="order"> </div><div id="order3_' + i + '" class="order"> </div></div>')
+		
 		// Ranking
 		$("#player_"+i).append('<div id="ranking_' + i + '" class="playerField"></div>')
 		$("#ranking_"+i).hide()
@@ -117,31 +124,53 @@ function setupPage() {
 	refreshPage()
 }
 
+function resetOrderButtons() {
+	for(let i = 0; i < state.numberOfPlayers; i++) {
+		if(state.selectedButtons[i] == "none") {
+			for(let j = 0; j < 4; j++) {
+				$("#order" + j + "_" + i).css("background-color", "white")
+			}
+		}
+	}
+}
+
 // Refresh the scores page
 function refreshPage() {
 	switch(state.questionMode) {
 		case "scoreboard":
 			$("#counter").html("Videotechnologie<br/>QUIZ")
+			$(".orderWrapper").hide()
 			$(".scoreWrapper").show()
+			resetOrderButtons()
 			break
 		case "multiple":
 			$("#counter").html("<h1>" + state.title + "<br/>Multiple Choice</h1>")
 			$(".scoreWrapper").hide()
+			$(".orderWrapper").hide()
+			resetOrderButtons()
 			break
 		case "multifirst":
 			$("#counter").html("<h1>" + state.title + "<br/>Snelste<br/>Multiple Choice</h1>")
 			$(".scoreWrapper").hide()
+			$(".orderWrapper").hide()
+			resetOrderButtons()
 			break
 		case "buzzer":
 			$("#counter").html("<h1>" + state.title + "<br/>Buzzer</h1>")
 			$(".scoreWrapper").hide()
+			$(".orderWrapper").hide()
+			resetOrderButtons()
 			break
 		case "inorder":
 			$("#counter").html("<h1>" + state.title + "<br/>In Volgorde</h1>")
 			$(".scoreWrapper").hide()
+			$(".orderWrapper").show()
+			resetOrderButtons()
 			break
 		default:
 			$("#counter").html("Videotechnologie<br/>QUIZ")
+			$(".orderWrapper").hide()
+			resetOrderButtons()
 	}
 	for(i = 0; i < state.numberOfPlayers; i++) {
 		$("#name_"+i).html(state.names[i])
@@ -236,6 +265,32 @@ function refreshPage() {
 					} else {
 						displayStatus(i, "neutral")
 					}
+				}
+				break
+			case "inorder":
+				if(state.questionActive) {
+					if(state.selectedButtons[i] != "none") {
+						let array = state.selectedButtons[i].split('-')
+						for(let j = 0; j < array.length; j++) {
+							$("#order" + j + "_" + i).css("background-color", "red")
+						}
+					}
+					$("#status_" + i).css({backgroundColor: "white"})
+				} else {
+					let array = state.selectedButtons[i].split('-')
+					for(let j = 0; j < array.length; j++) {
+						$("#order" + j + "_" + i).css("background-color", array[j])
+					}
+					$("#status_" + i).css({backgroundColor: "white"})
+					$("#ranking_" + i).hide()
+					displayStatus(i)
+/*					if(parseInt(state.scoresDelta[i]) > 0) {
+						displayStatus(i, "correct")
+					} else if(!state.correct[i] && state.selectedButtons[i].length == 24 ) {
+						displayStatus(i, "wrong")
+					} else {
+						displayStatus(i, "neutral")
+					}*/
 				}
 				break
 		}

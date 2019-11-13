@@ -11,7 +11,11 @@ var question = {
 	question: 'empty',
 	answers: [],
 	solution: 0,
+	solutionOrder: "blue-orange-green-yellow",
+	solutionBuzzer: "none",
 	score: 0,
+	scoreMinus: 0,
+	scoreArray: [],
 	remarks: 'none'
 }
 
@@ -81,6 +85,7 @@ $(function(){
 		state.questionMode = $("#questionmode").val()
 		state.currentQuestion.questionMode = $("#questionmode").val()
 		state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
+		state.currentQuestion.solutionOrder = $("#solutionOrder").val()
 		state.currentQuestion.score = $("#questionscore").val()
 		socket.emit('updateStatus', state)
 		socket.emit('start')
@@ -94,6 +99,7 @@ $(function(){
 		state.currentQuestion.questionMode = $("#questionmode").val()
 		state.currentQuestion.answers = [$("#answerBlue").val(), $("#answerOrange").val(), $("#answerGreen").val(), $("#answerYellow").val()]
 		state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
+		state.currentQuestion.solutionOrder = $("#solutionOrder").val()
 		state.currentQuestion.score = $("#questionscore").val()
 		state.currentQuestion.remarks = $("#remarks").val()
 		socket.emit('updateStatus', state)
@@ -108,6 +114,7 @@ $(function(){
 		state.currentQuestion.questionMode = $("#questionmode").val()
 		state.currentQuestion.answers = [$("#answerBlue").val(), $("#answerOrange").val(), $("#answerGreen").val(), $("#answerYellow").val()]
 		state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
+		state.currentQuestion.solutionOrder = $("#solutionOrder").val()
 		state.currentQuestion.score = $("#questionscore").val()
 		state.currentQuestion.remarks = $("#remarks").val()
 		socket.emit('updateStatus', state)
@@ -219,7 +226,8 @@ function refreshPage() {
 	$("#answerOrange").val(state.currentQuestion.answers[1])
 	$("#answerGreen").val(state.currentQuestion.answers[2])	
 	$("#answerYellow").val(state.currentQuestion.answers[3])	
-	$("input[name='questionanswer'][value='"+colorCode[state.currentQuestion.solution]+"']").prop('checked', true);	
+	$("input[name='questionanswer'][value='"+colorCode[state.currentQuestion.solution]+"']").prop('checked', true);
+	$("#solutionOrder").val(state.currentQuestion.solutionOrder)
 	$("#remarks").val(state.currentQuestion.remarks);
 	if(state.questionActive) {
 		$("#scoreboard").hide()
