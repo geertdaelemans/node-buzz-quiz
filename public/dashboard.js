@@ -267,6 +267,11 @@ function refreshPage() {
 		$("#buttonStart").html('Start')
 	}
 	selectQuestion(state.currentQuestion.id)
+	
+	// When question is active, prohibit scrolling through questions list
+	$("#nextQuestion").prop("disabled", state.questionActive)
+	$("#previousQuestion").prop("disabled", state.questionActive)
+	$("#moveTo").prop("disabled", state.questionActive)
 }
 
 socket.on('status', function(msg) {
@@ -295,10 +300,12 @@ socket.on('questions', function(questions) {
 		} else {
 			$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.question + '</p>')
 			$('#question_' + i ).click(function() {
-				let name = $(this).attr('name')
-				selectQuestion(name)
-				state.currentQuestion = questionsList[name]
-				socket.emit('updateStatus', state)
+				if(!state.questionActive) {  // Avoid scrolling through questions while question is active
+					let name = $(this).attr('name')
+					selectQuestion(name)
+					state.currentQuestion = questionsList[name]
+					socket.emit('updateStatus', state)
+				}
 			})
 		}
 	}
