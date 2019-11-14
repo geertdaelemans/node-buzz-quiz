@@ -136,7 +136,8 @@ function updateCurrentQuestion() {
 	state.currentQuestion.question = $("#question").val()
 	state.currentQuestion.answers = [$("#answerBlue").val(), $("#answerOrange").val(), $("#answerGreen").val(), $("#answerYellow").val()]	
 	state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
-	state.currentQuestion.solutionOrder = $("#solutionOrder").val()
+	let solutionOrder = $("#solutionOrder0").val() + '-' + $("#solutionOrder1").val() + '-' + $("#solutionOrder2").val() + '-' + $("#solutionOrder3").val()
+	state.currentQuestion.solutionOrder = solutionOrder
 	state.currentQuestion.solutionBuzzer = $("#solutionBuzzer").val()
 	state.currentQuestion.score = parseInt($("#questionscore").val())
 	state.currentQuestion.scoreMinus = parseInt($("#scoreMinus").val())
@@ -150,6 +151,21 @@ function updateCurrentQuestion() {
 
 // Initialize the dashboard page
 function setupPage() {
+	$('#questionmode').change(function() {
+		deactivateMenuChoices()
+	})
+	$("#solutionOrder0").change(function(){
+		$(this).css("background-color", $(this).val());
+	});
+	$("#solutionOrder1").change(function(){
+		$(this).css("background-color", $(this).val());
+	});
+	$("#solutionOrder2").change(function(){
+		$(this).css("background-color", $(this).val());
+	});
+	$("#solutionOrder3").change(function(){
+		$(this).css("background-color", $(this).val());
+	});
 	for(i = 0; i < state.numberOfPlayers; i++) {
 		$("#panels").append('<div id="player_' + i + '" class="player"></div>')
 		
@@ -209,8 +225,36 @@ function selectQuestion(index) {
 	$('#question_' + index).css('background-color', 'green')
 }
 
+// (De)activate menu choices depending om selected mode
+function deactivateMenuChoices() {
+	switch($("#questionmode").val()) {
+		case "multiple":
+		case "multifirst":
+			$('.radio').show()
+			$('#solutionOrderWrapper').hide()
+			$('#solutionBuzzerWrapper').hide()
+			$('#solutionMultiWrapper').show()			
+			break
+		case "inorder":
+			$('.radio').hide()
+			$('#solutionBuzzerWrapper').hide()
+			$('#solutionOrderWrapper').show()
+			$('#solutionMultiWrapper').show()			
+			break
+		case "buzzer":
+			$('#solutionOrderWrapper').hide()
+			$('#solutionMultiWrapper').hide()
+			$('#solutionBuzzerWrapper').show()			
+			break
+		default:
+			$('#solutionMultiWrapper').show()
+			$('#solutionOrderWrapper').show()
+			$('#solutionBuzzerWrapper').show()	
+	}
+}
+
 // Refresh the dashboard page
-function refreshPage() {
+function refreshPage() {	
 	$("#flashing").prop("checked", state.flashing)
 	$("input[id='id']").val(state.currentQuestion.id)
 	if(state.title == "") {
@@ -225,14 +269,24 @@ function refreshPage() {
 	$("#scoreMinus").val(state.currentQuestion.scoreMinus)
 	$("#scoreArray").val(state.currentQuestion.scoreArray)
 	$("#questionmode").val(state.currentQuestion.questionMode)
+	deactivateMenuChoices()
 	$("#answerBlue").val(state.currentQuestion.answers[0])
 	$("#answerOrange").val(state.currentQuestion.answers[1])
 	$("#answerGreen").val(state.currentQuestion.answers[2])	
 	$("#answerYellow").val(state.currentQuestion.answers[3])	
 	$("input[name='questionanswer'][value='"+colorCode[state.currentQuestion.solution]+"']").prop('checked', true);
-	$("#solutionOrder").val(state.currentQuestion.solutionOrder)
+	let solutionOrder = state.currentQuestion.solutionOrder.split('-')
+	$("#solutionOrder0").val(solutionOrder[0])
+	$("#solutionOrder0").css("background-color", solutionOrder[0])
+	$("#solutionOrder1").val(solutionOrder[1])
+	$("#solutionOrder1").css("background-color", solutionOrder[1])
+	$("#solutionOrder2").val(solutionOrder[2])
+	$("#solutionOrder2").css("background-color", solutionOrder[2])
+	$("#solutionOrder3").val(solutionOrder[3])
+	$("#solutionOrder3").css("background-color", solutionOrder[3])
 	$("#solutionBuzzer").val(state.currentQuestion.solutionBuzzer)
 	$("#remarks").val(state.currentQuestion.remarks);
+
 	if(state.questionActive) {
 		$("#scoreboard").hide()
 		$("#addScores").hide()

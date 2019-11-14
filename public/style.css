@@ -176,3 +176,27 @@ p.message, p.question {
 	width: 90%;
 	font-size: 25px;
 }
+
+.colorPick option[value="blue"] {
+	color: white;
+	background-color: blue; 
+}
+
+.colorPick option[value="orange"] {
+	color: white;
+	background-color: orange;   
+}
+
+.colorPick option[value="green"] {
+	color: white;
+	background-color: green;  
+}
+
+.colorPick option[value="yellow"] {
+	color: black;
+	background-color: yellow;  
+}
+
+.colorPicka:hover {
+  background-color: yellow;
+}

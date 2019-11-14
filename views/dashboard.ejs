@@ -38,27 +38,56 @@
 		  <option value="buzzer">Buzzer</option>
 		  <option value="inorder">In order</option>
 	    </select><br/>
-		<label>Answers:</label>
-		<div class="answerWrapper">
-		  <input type="radio" name="questionanswer" value="blue" class="radio">
-		  <input type="text" id="answerBlue" class="answer blue" />
+		<div id="solutionMultiWrapper">
+		  <label>Answers:</label>
+		  <div class="answerWrapper">
+			<input type="radio" name="questionanswer" value="blue" class="radio">
+			<input type="text" id="answerBlue" class="answer blue" />
+		  </div>
+		  <div class="answerWrapper">
+			<input type="radio" name="questionanswer" value="orange" class="radio">
+			<input type="text" id="answerOrange" class="answer orange" />
+		  </div>
+		  <div class="answerWrapper">
+			<input type="radio" name="questionanswer" value="green" class="radio">
+			<input type="text" id="answerGreen" class="answer green" />
+		  </div>
+		  <div class="answerWrapper">
+			<input type="radio" name="questionanswer" value="yellow" class="radio">
+			<input type="text" id="answerYellow" class="answer yellow" />
+		  </div>
 		</div>
-		<div class="answerWrapper">
-		  <input type="radio" name="questionanswer" value="orange" class="radio">
-		  <input type="text" id="answerOrange" class="answer orange" />
+		<div id="solutionOrderWrapper">
+		  <label>Solution order:</label><br/>
+		  <select id="solutionOrder0" class="colorPick" style="width: 50px; height: 30px;">
+		    <option value="blue"></option>
+		    <option value="orange"></option>
+		    <option value="green"></option>
+		    <option value="yellow"></option>
+	      </select>
+		  <select id="solutionOrder1" class="colorPick" style="width: 50px; height: 30px;">
+		    <option value="blue"></option>
+		    <option value="orange"></option>
+		    <option value="green"></option>
+		    <option value="yellow"></option>
+	      </select>
+		  <select id="solutionOrder2" class="colorPick" style="width: 50px; height: 30px;">
+		    <option value="blue"></option>
+		    <option value="orange"></option>
+		    <option value="green"></option>
+		    <option value="yellow"></option>
+	      </select>
+		  <select id="solutionOrder3" class="colorPick" style="width: 50px; height: 30px;">
+		    <option value="blue"></option>
+		    <option value="orange"></option>
+		    <option value="green"></option>
+		    <option value="yellow"></option>
+	      </select>
 		</div>
-		<div class="answerWrapper">
-		  <input type="radio" name="questionanswer" value="green" class="radio">
-		  <input type="text" id="answerGreen" class="answer green" />
+		<div id="solutionBuzzerWrapper">
+		  <label for="solutionBuzzer">Solution Buzzer:</label><br/>
+		  <input type="text" id="solutionBuzzer" /><br/>
 		</div>
-		<div class="answerWrapper">
-		  <input type="radio" name="questionanswer" value="yellow" class="radio">
-		  <input type="text" id="answerYellow" class="answer yellow" />
-		</div>
-		<label for="solutionOrder">Solution order:</label><br/>
-		<input type="text" id="solutionOrder" /><br/>
-		<label for="solutionBuzzer">Solution Buzzer:</label><br/>
-		<input type="text" id="solutionBuzzer" /><br/>
 		<label for="questionscore">Score:</label><br/>
 		<input type="number" min="0" id="questionscore" /><br/>
 		<label for="scoreMinus">Minus score:</label><br/>
