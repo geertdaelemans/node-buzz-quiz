@@ -42,6 +42,7 @@ var state = {
 	numberOfReplies: 0,
 	currentQuestion: question,
 	title: "",
+	modus: "waiting",
 	questionMode: "scoreboard",
 	questionActive: false,
 	lightState: [],

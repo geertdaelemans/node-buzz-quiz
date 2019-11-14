@@ -67,6 +67,7 @@ var state = {
 	numberOfReplies: 0,
 	currentQuestion: question,
 	title: "",
+	modus: "waiting",
 	questionMode: "scoreboard",
 	questionActive: false,
 	lightState: [],
@@ -226,11 +227,11 @@ io.on('connection', function(socket) {
 })
 
 // Routes
-app.get('/dashboard', (req, res) => {
+app.get('/', (req, res) => {
 	res.render('dashboard')
 })
 
-app.get('/', (req, res) => {
+app.get('/scores', (req, res) => {
 	res.render('scores')
 })
 

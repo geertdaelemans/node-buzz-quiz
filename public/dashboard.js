@@ -32,6 +32,7 @@ var state = {
 	currentQuestion: question,
 	title: "",
 	questionMode: "scoreboard",
+	modus: "waiting",
 	questionActive: false,
 	lightState: [],
 	flashing: true
@@ -80,46 +81,23 @@ $(function(){
 
 	// Start question mode
 	$("#buttonStart").click(function() {
+		updateCurrentQuestion()
 		state.title = $("#title").val()
-		state.currentQuestion.question = $("#question").val()
 		state.questionMode = $("#questionmode").val()
-		state.currentQuestion.questionMode = $("#questionmode").val()
-		state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
-		state.currentQuestion.solutionOrder = $("#solutionOrder").val()
-		state.currentQuestion.score = $("#questionscore").val()
-		state.currentQuestion.scoreMinus = $("#scoreMinus").val()
 		socket.emit('updateStatus', state)
 		socket.emit('start')
     })
 	
 	// Update question
 	$("#updateQuestion").click(function() {
-		state.currentQuestion.question = $("#question").val()
-		state.currentQuestion.round = $("#round").val()
-		state.currentQuestion.category = $("#category").val()
-		state.currentQuestion.questionMode = $("#questionmode").val()
-		state.currentQuestion.answers = [$("#answerBlue").val(), $("#answerOrange").val(), $("#answerGreen").val(), $("#answerYellow").val()]
-		state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
-		state.currentQuestion.solutionOrder = $("#solutionOrder").val()
-		state.currentQuestion.score = $("#questionscore").val()
-		state.currentQuestion.scoreMinus = $("#scoreMinus").val()
-		state.currentQuestion.remarks = $("#remarks").val()
+		updateCurrentQuestion()
 		socket.emit('updateStatus', state)
 		socket.emit('updateQuestion')
 	})
 	
 	//
 	$("#newQuestion").click(function() {
-		state.currentQuestion.question = $("#question").val()
-		state.currentQuestion.round = $("#round").val()
-		state.currentQuestion.category = $("#category").val()
-		state.currentQuestion.questionMode = $("#questionmode").val()
-		state.currentQuestion.answers = [$("#answerBlue").val(), $("#answerOrange").val(), $("#answerGreen").val(), $("#answerYellow").val()]
-		state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
-		state.currentQuestion.solutionOrder = $("#solutionOrder").val()
-		state.currentQuestion.score = $("#questionscore").val()
-		state.currentQuestion.scoreMinus = $("#scoreMinus").val()
-		state.currentQuestion.remarks = $("#remarks").val()
+		updateCurrentQuestion()
 		socket.emit('updateStatus', state)
 		socket.emit('newQuestion')
 	})
@@ -149,6 +127,26 @@ $(function(){
 		socket.emit('previousQuestion')
 	})
 });
+
+// Update current Question in memory
+function updateCurrentQuestion() {
+	state.currentQuestion.round = $("#round").val()
+	state.currentQuestion.category = $("#category").val()
+	state.currentQuestion.questionMode = $("#questionmode").val()
+	state.currentQuestion.question = $("#question").val()
+	state.currentQuestion.answers = [$("#answerBlue").val(), $("#answerOrange").val(), $("#answerGreen").val(), $("#answerYellow").val()]	
+	state.currentQuestion.solution = colorCode.indexOf($("input[name='questionanswer']:checked").val())
+	state.currentQuestion.solutionOrder = $("#solutionOrder").val()
+	state.currentQuestion.solutionBuzzer = $("#solutionBuzzer").val()
+	state.currentQuestion.score = parseInt($("#questionscore").val())
+	state.currentQuestion.scoreMinus = parseInt($("#scoreMinus").val())
+	var ArrayData = $.map($("#scoreArray").val().split(','), function(value){
+		return parseInt(value, 10);
+		// or return +value; which handles float values as well
+	})
+	state.currentQuestion.scoreArray = ArrayData
+	state.currentQuestion.remarks = $("#remarks").val()
+}
 
 // Initialize the dashboard page
 function setupPage() {
@@ -225,6 +223,7 @@ function refreshPage() {
 	$("#category").val(state.currentQuestion.category) 
 	$("#questionscore").val(state.currentQuestion.score)
 	$("#scoreMinus").val(state.currentQuestion.scoreMinus)
+	$("#scoreArray").val(state.currentQuestion.scoreArray)
 	$("#questionmode").val(state.currentQuestion.questionMode)
 	$("#answerBlue").val(state.currentQuestion.answers[0])
 	$("#answerOrange").val(state.currentQuestion.answers[1])
@@ -232,6 +231,7 @@ function refreshPage() {
 	$("#answerYellow").val(state.currentQuestion.answers[3])	
 	$("input[name='questionanswer'][value='"+colorCode[state.currentQuestion.solution]+"']").prop('checked', true);
 	$("#solutionOrder").val(state.currentQuestion.solutionOrder)
+	$("#solutionBuzzer").val(state.currentQuestion.solutionBuzzer)
 	$("#remarks").val(state.currentQuestion.remarks);
 	if(state.questionActive) {
 		$("#scoreboard").hide()
