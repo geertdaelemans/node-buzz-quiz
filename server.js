@@ -4,6 +4,8 @@ const util = require('util')
 const Buzz = require("./buzz/buzzers.js")
 const fs = require('fs')
 
+var audioFiles = fs.readdirSync('./public/wav/');
+
 const storeData = (data, path) => {
   try {
     fs.writeFileSync(path, JSON.stringify(data))
@@ -193,7 +195,12 @@ io.on('connection', function(socket) {
 			sendStatus()
 			io.emit('questions', questions)
 		}
-	})	
+	})
+
+	// Send current list of available audio files
+	socket.on("getAudioFiles", function() {
+		io.emit('audioFiles', audioFiles)
+	})
 
 	// Next question
 	socket.on("nextQuestion", function() {
@@ -364,6 +371,9 @@ buzz.on("buttondown",function(event) {
 	var playerName = `Buzz ${playerNumber}`
 	util.log(`${playerName} pushed ${event.button}`)
 	io.sockets.emit('new_message', {message : event.button, username : playerName, playerId : playerNumber})
+	if(event.button == "red") {
+		io.emit('sound', event.controllerId)
+	}
 	switch(state.questionMode) {
 		
 		// Simple multiple choice questions (no limits)
@@ -446,7 +456,7 @@ buzz.on("buttondown",function(event) {
 				}
 				
 				// Update status 
-				sendStatus()				
+				sendStatus()
 			}
 			break
 			

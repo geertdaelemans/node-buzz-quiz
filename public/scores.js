@@ -2,6 +2,17 @@ var socket = io.connect('http://localhost:3000')
 
 var pageLoaded = false
 
+var audio = []
+audio[0] = new Audio('./wav/alarm.wav');
+audio[1] = new Audio('./wav/crinkle.wav')
+audio[2] = new Audio('./wav/ding.wav')
+audio[3] = new Audio('./wav/flush.wav')
+audio[4] = new Audio('./wav/intro.wav')
+for(let i = 0; i < audio.length; i++) {
+	audio[i].autoplay = true
+}
+
+
 // Question
 var question = {
 	id: 0,
@@ -38,7 +49,8 @@ var state = {
 }
 
 $(function(){
-	socket.emit('getStatus')	
+	socket.emit('getStatus')
+	socket.emit('getAudioFiles')	
 });
 
 // Display status icon
@@ -307,3 +319,21 @@ socket.on('status', function(msg) {
 		refreshPage()
 	}
 });
+
+socket.on('sound', function(msg) {
+	let index = msg % audio.length
+	console.log("index", index)
+	audio[index].load()
+	audio[index].play()
+})
+
+// Receive list of available audio files
+socket.on('audioFiles', function(msg) {
+	for(let i = 0; i < msg.length; i++) {
+		console.log('./wav/' + msg[i])
+//		audio[i] = new Audio('./wav/' + msg[i]);
+//		audio[i].autoplay = true
+//		audio[i].load()
+	}	
+//	console.log("Audio files", audio)
+})
