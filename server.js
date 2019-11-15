@@ -69,7 +69,6 @@ var state = {
 	title: "",
 	modus: "waiting",
 	questionMode: "scoreboard",
-	questionActive: false,
 	lightState: [],
 	flashing: true
 }
@@ -151,10 +150,35 @@ io.on('connection', function(socket) {
 	
 	// Start question received
 	socket.on("start", function(msg) {
-		if(state.questionActive) {
+		if(state.modus == "ready") {
+			resetQuestion()
+		} else if(state.modus == "active") {
 			evaluateQuestion()
 		} else {
 			startQuestion()
+		}
+	})
+	
+	// Ready state received
+	socket.on("ready", function() {
+		resetQuestion()
+		sendStatus()
+	})
+	
+	// Active state received
+	socket.on("active", function() {
+		startQuestion()
+	})
+	
+	// Finished state received
+	socket.on("finished", function() {
+		evaluateQuestion()
+	})
+	
+	// Finished state received
+	socket.on("results", function() {
+		if(state.questionMode == "buzzer") {
+			calculateBuzzer()
 		}
 	})
 	
@@ -306,43 +330,50 @@ function startQuestion() {
 		case "buzzer":
 			state.flashing = false
 			allLights(true)
-			state.questionActive = true
+			state.modus = "active"
 			break;
 		default:
 	}
-	resetQuestion()
 	sendStatus()
 }
 
 // Evaluate question
 function evaluateQuestion() {
+	if(state.modus != "buzzer") {
+		allLights(false)
+		state.flashing = true
+	}
 	switch(state.questionMode) {
 		case "multiple":
 		case "multifirst":
 		case "inorder":
 			state.flashing = false
-			state.questionActive = false
+			state.modus = "finished"
 			break
 		case "buzzer":
 			state.flashing = false
-			state.questionActive = false
-			for(let i = 1; i <= state.numberOfPlayers; i++) {
-				let playerIndex = state.speedSequence.indexOf(i)
-				if(playerIndex != -1) {
-					if(state.correct[playerIndex]) {
-						state.scoresDelta[playerIndex] = parseInt(state.currentQuestion.score)
-						break
-					} else {
-						state.scoresDelta[playerIndex] = -parseInt(state.currentQuestion.scoreMinus)
-					}
-				} else {
-					break
-				}
-			}
+			state.modus = "finished"
 			break
 		default:
 	}
 	sendStatus()
+}
+
+// Calculate buzzer points
+function calculateBuzzer() {
+	for(let i = 1; i <= state.numberOfPlayers; i++) {
+		let playerIndex = state.speedSequence.indexOf(i)
+		if(playerIndex != -1) {
+			if(state.correct[playerIndex]) {
+				state.scoresDelta[playerIndex] = parseInt(state.currentQuestion.score)
+				break
+			} else {
+				state.scoresDelta[playerIndex] = -parseInt(state.currentQuestion.scoreMinus)
+			}
+		} else {
+			break
+		}
+	}
 }
 
 // Reset question
@@ -355,6 +386,7 @@ function resetQuestion() {
 		state.speedSequence[i] = 0
 	}
 	state.numberOfReplies = 0
+	allLights(false)
 	
 	storeData(state, "latestStatus.txt")
 }
@@ -380,7 +412,8 @@ buzz.on("buttondown",function(event) {
 		// Simple multiple choice questions (no limits)
 		case "multiple":
 			// Player pushed multiple choice button once
-			if(state.selectedButtons[event.controllerId] == "none" &&
+			if(state.modus == "active" &&
+			   state.selectedButtons[event.controllerId] == "none" &&
 			   event.button != "red") {
 				   
 				// Register pushed button
@@ -410,7 +443,7 @@ buzz.on("buttondown",function(event) {
 		// Multiple choice, only fastest correct answer counts
 		case "multifirst":
 			// Player pushed multiple choice button once
-			if(state.questionActive == true &&
+			if(state.modus == "active" &&
 			   state.selectedButtons[event.controllerId] == "none" &&
 			   event.button != "red") {
 				
@@ -441,7 +474,7 @@ buzz.on("buttondown",function(event) {
 		
 		case "buzzer":
 			// Player pushed red button once
-			if(state.questionActive == true &&
+			if(state.modus == "active" &&
 			   state.selectedButtons[event.controllerId] == "none" &&
 			   event.button == "red") {
 				   
@@ -463,7 +496,7 @@ buzz.on("buttondown",function(event) {
 			
 		// Set in order, a sequence of four unique buttons needs to be pushed
 		case "inorder":
-			if(state.questionActive == true &&
+			if(state.modus == "active" &&
 			   event.button != "red" &&
 			   state.selectedButtons[event.controllerId].indexOf(event.button) == -1) {
 				   

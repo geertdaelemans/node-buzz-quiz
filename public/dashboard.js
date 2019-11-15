@@ -33,7 +33,6 @@ var state = {
 	title: "",
 	questionMode: "scoreboard",
 	modus: "waiting",
-	questionActive: false,
 	lightState: [],
 	flashing: true
 }
@@ -87,6 +86,49 @@ $(function(){
 		socket.emit('updateStatus', state)
 		socket.emit('start')
     })
+	
+	// Set waiting modus
+	$("#buttonWaiting").click(function() {
+		state.modus = "waiting"
+		state.flashing = true
+		socket.emit('updateStatus', state)
+    })
+	
+	// Set ready modus
+	$("#buttonReady").click(function() {
+		updateCurrentQuestion()
+		state.title = $("#title").val()
+		state.questionMode = $("#questionmode").val()
+		state.flashing = true
+		state.modus = "ready"
+		socket.emit('updateStatus', state)
+		socket.emit('ready')
+    })	
+	
+	// Set active modus
+	$("#buttonActive").click(function() {
+		updateCurrentQuestion()
+		state.title = $("#title").val()
+		state.questionMode = $("#questionmode").val()
+		state.modus = "active"
+		socket.emit('updateStatus', state)
+		socket.emit('active')
+    })		
+	
+	// Set finished modus
+	$("#buttonFinished").click(function() {
+		state.modus = "finished"
+		socket.emit('updateStatus', state)
+		socket.emit('finished')
+    })
+	
+	// Set results modus
+	$("#buttonResults").click(function() {
+		state.modus = "results"
+		socket.emit('updateStatus', state)
+		socket.emit('results')
+		socket.emit('nextQuestion')
+    })	
 	
 	// Update question
 	$("#updateQuestion").click(function() {
@@ -253,9 +295,86 @@ function deactivateMenuChoices() {
 	}
 }
 
+// Set control flow modus
+function setModus() {
+	switch(state.modus) {
+		case "waiting":
+			$('#buttonWaiting').css('background-color', 'green')
+			$('#buttonWaiting').css('color', 'white')
+			$('#buttonReady').css('background-color', 'lightgray')
+			$('#buttonReady').css('color', 'black')
+			$('#buttonActive').css('background-color', 'lightgray')
+			$('#buttonActive').css('color', 'black')
+			$('#buttonFinished').css('background-color', 'lightgray')
+			$('#buttonFinished').css('color', 'black')
+			$('#buttonResults').css('background-color', 'lightgray')
+			$('#buttonResults').css('color', 'black')
+			break
+		case "ready":
+			$('#buttonWaiting').css('background-color', 'green')
+			$('#buttonWaiting').css('color', 'white')
+			$('#buttonReady').css('background-color', 'green')
+			$('#buttonReady').css('color', 'white')
+			$('#buttonActive').css('background-color', 'lightgray')
+			$('#buttonActive').css('color', 'black')
+			$('#buttonFinished').css('background-color', 'lightgray')
+			$('#buttonFinished').css('color', 'black')
+			$('#buttonResults').css('background-color', 'lightgray')
+			$('#buttonResults').css('color', 'black')
+			break
+		case "active":
+			$('#buttonWaiting').css('background-color', 'green')
+			$('#buttonWaiting').css('color', 'white')
+			$('#buttonReady').css('background-color', 'green')
+			$('#buttonReady').css('color', 'white')
+			$('#buttonActive').css('background-color', 'green')
+			$('#buttonActive').css('color', 'white')
+			$('#buttonFinished').css('background-color', 'lightgray')
+			$('#buttonFinished').css('color', 'black')
+			$('#buttonResults').css('background-color', 'lightgray')
+			$('#buttonResults').css('color', 'black')			
+			break
+		case "finished":
+			$('#buttonWaiting').css('background-color', 'green')
+			$('#buttonWaiting').css('color', 'white')
+			$('#buttonReady').css('background-color', 'green')
+			$('#buttonReady').css('color', 'white')
+			$('#buttonActive').css('background-color', 'green')
+			$('#buttonActive').css('color', 'white')
+			$('#buttonFinished').css('background-color', 'green')
+			$('#buttonFinished').css('color', 'white')
+			$('#buttonResults').css('background-color', 'lightgray')
+			$('#buttonResults').css('color', 'black')			
+			break
+		case "results":
+			$('#buttonWaiting').css('background-color', 'green')
+			$('#buttonWaiting').css('color', 'white')
+			$('#buttonReady').css('background-color', 'green')
+			$('#buttonReady').css('color', 'white')
+			$('#buttonActive').css('background-color', 'green')
+			$('#buttonActive').css('color', 'white')
+			$('#buttonFinished').css('background-color', 'green')
+			$('#buttonFinished').css('color', 'white')
+			$('#buttonResults').css('background-color', 'green')
+			$('#buttonResults').css('color', 'white')
+			break
+		default:
+			$('#buttonWaiting').css('background-color', 'lightgray')
+			$('#buttonReady').css('background-color', 'lightgray')
+			$('#buttonActive').css('background-color', 'lightgray')
+			$('#buttonFinished').css('background-color', 'lightgray')
+			$('#buttonResults').css('background-color', 'lightgray')		
+	}
+}
+
 // Refresh the dashboard page
-function refreshPage() {	
+function refreshPage() {
+
+	// Control panel
+	setModus()
 	$("#flashing").prop("checked", state.flashing)
+	
+	// Current question panel
 	$("input[id='id']").val(state.currentQuestion.id)
 	if(state.title == "") {
 		$("#title").val("Vraag " + (state.currentQuestion.id + 1))
@@ -287,7 +406,7 @@ function refreshPage() {
 	$("#solutionBuzzer").val(state.currentQuestion.solutionBuzzer)
 	$("#remarks").val(state.currentQuestion.remarks);
 
-	if(state.questionActive) {
+	if(state.modus == "active") {
 		$("#scoreboard").hide()
 		$("#addScores").hide()
 	} else {
@@ -319,7 +438,7 @@ function refreshPage() {
 		$("#name_"+i).val(state.names[i])
 		$("#rank_"+i).html(state.speedSequence[i])
 	}
-	if(state.questionActive) {
+	if(state.modus == "active") {
 		$("#buttonStart").html('Evalueer')
 	} else {
 		$("#buttonStart").html('Start')
@@ -327,9 +446,9 @@ function refreshPage() {
 	selectQuestion(state.currentQuestion.id)
 	
 	// When question is active, prohibit scrolling through questions list
-	$("#nextQuestion").prop("disabled", state.questionActive)
-	$("#previousQuestion").prop("disabled", state.questionActive)
-	$("#moveTo").prop("disabled", state.questionActive)
+	$("#nextQuestion").prop("disabled", state.modus == "active")
+	$("#previousQuestion").prop("disabled", state.modus == "active")
+	$("#moveTo").prop("disabled", state.modus == "active")
 }
 
 socket.on('status', function(msg) {
@@ -358,7 +477,7 @@ socket.on('questions', function(questions) {
 		} else {
 			$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.question + '</p>')
 			$('#question_' + i ).click(function() {
-				if(!state.questionActive) {  // Avoid scrolling through questions while question is active
+				if(state.modus == "waiting") {  // Avoid scrolling through questions while question is active
 					let name = $(this).attr('name')
 					selectQuestion(name)
 					state.currentQuestion = questionsList[name]

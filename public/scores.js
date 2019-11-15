@@ -44,7 +44,6 @@ var state = {
 	title: "",
 	modus: "waiting",
 	questionMode: "scoreboard",
-	questionActive: false,
 	lightState: [],
 	flashing: true
 }
@@ -147,9 +146,8 @@ function resetOrderButtons() {
 	}
 }
 
-// Refresh the scores page
-function refreshPage() {
-	switch(state.questionMode) {
+function setupPanels(mode) {
+	switch(mode) {
 		case "scoreboard":
 			$("#counter").html("Videotechnologie<br/>QUIZ")
 			$(".orderWrapper").hide()
@@ -177,7 +175,11 @@ function refreshPage() {
 		case "inorder":
 			$("#counter").html("<h1>" + state.title + "<br/>In Volgorde</h1>")
 			$(".scoreWrapper").hide()
-			$(".orderWrapper").show()
+			if(state.modus == "results") {
+				$(".orderWrapper").hide()
+			} else {
+				$(".orderWrapper").show()
+			}
 			resetOrderButtons()
 			break
 		default:
@@ -185,9 +187,12 @@ function refreshPage() {
 			$(".orderWrapper").hide()
 			resetOrderButtons()
 	}
+}
+
+function fillPlayerGrid(mode) {
 	for(i = 0; i < state.numberOfPlayers; i++) {
 		$("#name_"+i).html(state.names[i])
-		switch (state.questionMode) {
+		switch (mode) {
 			case "scoreboard":
 				displayStatus(i)
 				$("#status_"+i).css({backgroundColor: "white"})
@@ -210,103 +215,169 @@ function refreshPage() {
 				}
 				break
 			case "multiple":
-				if(state.questionActive) {
-					$("#status_"+i).css({backgroundColor: "white"})
-					if (state.selectedButtons[i] != "none") {
-						displayStatus(i, "ok")
-					} else {
-						displayStatus(i, "waiting")					
-					}
-				} else {
-					if (state.selectedButtons[i] != "none") {
-						$("#status_"+i).css({backgroundColor: state.selectedButtons[i]})
-					} else {
+				switch(state.modus) {
+					case "active":
 						$("#status_"+i).css({backgroundColor: "white"})
-					}
-					if(state.selectedButtons[i] == "none") {
-						displayStatus(i, "neutral")
-					} else {
-						displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
-					}
+						if (state.selectedButtons[i] != "none") {
+							displayStatus(i, "ok")
+						} else {
+							displayStatus(i, "waiting")					
+						}
+						break
+					case "finished":
+						if (state.selectedButtons[i] != "none") {
+							$("#status_"+i).css({backgroundColor: state.selectedButtons[i]})
+							displayStatus(i)
+						} else {
+							$("#status_"+i).css({backgroundColor: "white"})
+							displayStatus(i, "neutral")
+						}
+						break						
+					case "results":
+						if(state.selectedButtons[i] == "none") {
+							displayStatus(i, "neutral")
+						} else {
+							displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
+						}
+						break
+					default:
+						$("#status_"+i).css({backgroundColor: "white"})
+						displayStatus(i)						
 				}
 				break
 			case "multifirst":
-				if(state.questionActive) {
-					$("#status_"+i).css({backgroundColor: "white"})
-					if (state.selectedButtons[i] != "none") {
-						if(state.selectedButtons[i] == state.solution) {
-							displayStatus(i, "correct")
-						} else {
-							displayStatus(i, "wrong")
-						}
-					} else {
-						displayStatus(i, "waiting")					
-					}
-				} else {
-					if (state.selectedButtons[i] != "none") {
-						$("#status_"+i).css({backgroundColor: state.selectedButtons[i]})
-					} else {
+				switch(state.modus) {
+					case "active":
 						$("#status_"+i).css({backgroundColor: "white"})
-					}
-					if(state.selectedButtons[i] == "none") {
-						displayStatus(i, "neutral")
-					} else {
-						displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
-					}
+						if (state.selectedButtons[i] != "none") {
+							if(state.selectedButtons[i] == state.solution) {
+								displayStatus(i, "correct")
+							} else {
+								displayStatus(i, "wrong")
+							}
+						} else {
+							displayStatus(i, "waiting")					
+						}
+						break
+					case "finished":
+						if(state.selectedButtons[i] == "none") {
+							displayStatus(i, "neutral")
+						} else {
+							displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
+						}
+						break
+					case "results":
+						if (state.selectedButtons[i] != "none") {
+							$("#status_"+i).css({backgroundColor: state.selectedButtons[i]})
+						} else {
+							$("#status_"+i).css({backgroundColor: "white"})
+						}
+						if(state.selectedButtons[i] == "none") {
+							displayStatus(i, "neutral")
+						} else {
+							displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
+						}
+						break
+					default:
+						$("#status_"+i).css({backgroundColor: "white"})
+						displayStatus(i)
 				}
 				break
 			case "buzzer":
-				if(state.questionActive) {
-					$("#status_"+i).css({backgroundColor: "white"})
-					if(state.speedSequence[i] == 0) {
-						$("#ranking_"+i).css({backgroundColor: "white"})
+				switch(state.modus) {
+					case "active":
+						$("#status_"+i).css({backgroundColor: "white"})
+						if(state.speedSequence[i] == 0) {
+							$("#ranking_"+i).css({backgroundColor: "white"})
+							$("#ranking_" + i).hide()
+							displayStatus(i, "waiting")
+						} else {
+							$("#ranking_" + i).css({backgroundColor: "red"})
+							$("#ranking_" + i).html(state.speedSequence[i])
+							displayStatus(i)
+							$("#ranking_" + i).show()
+						}
+						break
+					case "finished":
+						if(state.speedSequence[i] == 0) {
+							$("#ranking_"+i).css({backgroundColor: "white"})
+							$("#ranking_" + i).hide()
+							displayStatus(i, "neutral")
+						} else {
+							$("#ranking_" + i).css({backgroundColor: "red"})
+							$("#ranking_" + i).html(state.speedSequence[i])
+							displayStatus(i)
+							$("#ranking_" + i).show()
+						}
+						break
+					case "results":
 						$("#ranking_" + i).hide()
-						displayStatus(i, "waiting")
-					} else {
-						$("#ranking_" + i).css({backgroundColor: "red"})
-						$("#ranking_" + i).html(state.speedSequence[i])
 						displayStatus(i)
-						$("#ranking_" + i).show()
-					}
-				} else {
-					$("#ranking_" + i).hide()
-					displayStatus(i)
-					if(parseInt(state.scoresDelta[i]) > 0) {
-						displayStatus(i, "correct")
-					} else if(parseInt(state.scoresDelta[i]) < 0) {
-						displayStatus(i, "wrong")
-					} else {
-						displayStatus(i, "neutral")
-					}
+						if(parseInt(state.scoresDelta[i]) > 0) {
+							displayStatus(i, "correct")
+						} else if(parseInt(state.scoresDelta[i]) < 0) {
+							displayStatus(i, "wrong")
+						} else {
+							displayStatus(i)
+						}
+						break
+					default:
+						$("#status_"+i).css({backgroundColor: "white"})
+						displayStatus(i)						
 				}
 				break
 			case "inorder":
-				if(state.questionActive) {
-					if(state.selectedButtons[i] != "none") {
+				switch(state.modus) {
+					case "active":
+						$("#status_" + i).css({backgroundColor: "white"})
+						if(state.selectedButtons[i] != "none") {
+							let array = state.selectedButtons[i].split('-')
+							for(let j = 0; j < array.length; j++) {
+								$("#order" + j + "_" + i).css("background-color", "red")
+							}
+						}
+						break
+					case "finished":
 						let array = state.selectedButtons[i].split('-')
 						for(let j = 0; j < array.length; j++) {
-							$("#order" + j + "_" + i).css("background-color", "red")
+							$("#order" + j + "_" + i).css("background-color", array[j])
 						}
-					}
-					$("#status_" + i).css({backgroundColor: "white"})
-				} else {
-					let array = state.selectedButtons[i].split('-')
-					for(let j = 0; j < array.length; j++) {
-						$("#order" + j + "_" + i).css("background-color", array[j])
-					}
-					$("#status_" + i).css({backgroundColor: "white"})
-					$("#ranking_" + i).hide()
-					displayStatus(i)
-/*					if(parseInt(state.scoresDelta[i]) > 0) {
-						displayStatus(i, "correct")
-					} else if(!state.correct[i] && state.selectedButtons[i].length == 24 ) {
-						displayStatus(i, "wrong")
-					} else {
-						displayStatus(i, "neutral")
-					}*/
+						$("#status_" + i).css({backgroundColor: "white"})
+						$("#ranking_" + i).hide()
+						displayStatus(i)
+						break
+					case "results":
+						if(parseInt(state.scoresDelta[i]) > 0) {
+							displayStatus(i, "correct")
+						} else if(!state.correct[i] && state.selectedButtons[i].length == 24 ) {
+							displayStatus(i, "wrong")
+						} else {
+							displayStatus(i, "neutral")
+						}
+						break
+					default:
+						$("#status_"+i).css({backgroundColor: "white"})
+						displayStatus(i)
 				}
 				break
 		}
+	}
+}
+
+// Refresh the scores page
+function refreshPage() {
+	switch(state.modus) {
+		case "waiting":
+			setupPanels("scoreboard")
+			fillPlayerGrid("scoreboard")
+			break
+		case "ready":
+			setupPanels(state.questionMode)
+			fillPlayerGrid(state.questionMode)
+			break
+		default:
+			setupPanels(state.questionMode)
+			fillPlayerGrid(state.questionMode)
 	}
 }
 
