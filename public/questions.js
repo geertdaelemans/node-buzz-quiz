@@ -54,7 +54,9 @@ function getQuestionMode() {
 		case "multiple":
 			return "Multiple Choice"
 		case "multifirst":
-			return "Multiple Choice Snelheid"
+			return "Multiple Choice<br/>De snelste wint"
+		case "multisteal":
+			return "Multiple Choice<br/>De snelste steelt"
 		case "buzzer":
 			return "Buzzer"
 		case "inorder":
@@ -146,7 +148,11 @@ function stripImageTags(string) {
 
 // Refresh the questions page
 function refreshPage() {
-	switch(state.modus) {
+	let modus = state.modus
+	if(modus == "finished" && state.questionMode == "multisteal") {
+		modus = "results"
+	}
+	switch(modus) {
 		case "waiting":
 			activatePanel("waiting")
 			break
@@ -207,6 +213,7 @@ function refreshPage() {
 			switch(state.questionMode) {
 				case "multiple":
 				case "multifirst":
+				case "multisteal":
 					$('#answer').html(state.currentQuestion.answers[state.currentQuestion.solution])
 					activatePanel("answer")
 					break

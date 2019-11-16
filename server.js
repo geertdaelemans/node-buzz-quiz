@@ -82,6 +82,13 @@ if(!questions) {
 }
 util.log(questions.length + ' questions loaded.')
 
+// Sending flashing inforation to client
+var emitLight = false
+var flash = 0
+
+// Winner index
+var winnerIndex = 0
+
 // Listen on every connection
 io.on('connection', function(socket) {
 	util.log(`User connected: ${socket.id}.`)
@@ -167,6 +174,10 @@ io.on('connection', function(socket) {
 	socket.on("results", function() {
 		if(state.questionMode == "buzzer") {
 			calculateBuzzer()
+		} else if (state.questionMode == "multisteal") {
+			if(state.correct.includes(true)) {
+				stealScores()
+			}
 		}
 	})
 	
@@ -290,6 +301,10 @@ setInterval(function() {
 				lightStateFlash[i] = false;
 			}
 			lightStateFlash[flashIndex % state.numberOfPlayers] = true
+			if(emitLight) {
+				flash = flashIndex % state.numberOfPlayers
+				io.emit('flash', flash)
+			}
 		}
 	} else {
 		for (i = 0; i < state.numberOfPlayers; i++) {
@@ -314,6 +329,7 @@ function startQuestion() {
 	switch(state.questionMode) {
 		case "multiple":
 		case "multifirst":
+		case "multisteal":
 		case "inorder":
 		case "buzzer":
 			state.flashing = false
@@ -334,6 +350,7 @@ function evaluateQuestion() {
 	switch(state.questionMode) {
 		case "multiple":
 		case "multifirst":
+		case "multisteal":
 		case "inorder":
 			state.flashing = false
 			state.modus = "finished"
@@ -362,6 +379,15 @@ function calculateBuzzer() {
 			break
 		}
 	}
+}
+
+// Steal scores
+function stealScores() {
+	winnerIndex = state.correct.indexOf(true)
+	allLights(false)
+	state.flashing = true
+	state.lightState[winnerIndex] = true
+	emitLight = true
 }
 
 // Reset question
@@ -430,6 +456,7 @@ buzz.on("buttondown",function(event) {
 		
 		// Multiple choice, only fastest correct answer counts
 		case "multifirst":
+		case "multisteal":
 			// Player pushed multiple choice button once
 			if(state.modus == "active" &&
 			   state.selectedButtons[event.controllerId] == "none" &&
@@ -443,7 +470,9 @@ buzz.on("buttondown",function(event) {
 				// One player has submitted a correct answer and all stops
 				if(event.button == colorCode[state.currentQuestion.solution]) {
 					state.correct[event.controllerId] = true
-					state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+					if(state.questionMode != "multisteal") {
+						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+					}
 					evaluateQuestion()
 				}
 				
@@ -457,6 +486,14 @@ buzz.on("buttondown",function(event) {
 				if(state.numberOfReplies == state.numberOfPlayers) {
 					evaluateQuestion()
 				}
+			} else if(state.modus == "results" &&
+				      event.controllerId == winnerIndex &&
+					  event.button == "red") {
+				emitLight = false
+				let looserIndex = flash
+				state.scoresDelta[winnerIndex] = 100
+				state.scoresDelta[looserIndex] = -100
+				console.log("Player " + (looserIndex + 1) + " looses from player " + (winnerIndex + 1))
 			}
 			break		
 		

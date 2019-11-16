@@ -1,6 +1,7 @@
 var socket = io.connect('http://localhost:3000')
 
 var pageLoaded = false
+var flash = 0;
 
 var audio = []
 audio[0] = new Audio('./wav/alarm.wav');
@@ -55,51 +56,51 @@ $(function(){
 
 // Display status icon
 function displayStatus(player, status = "none") {
-	$("#score_"+i).hide()
-	$("#delta_"+i).hide()
-	$("#rank_"+i).hide()
+	$("#score_"+player).hide()
+	$("#delta_"+player).hide()
+	$("#rank_"+player).hide()
 	switch(status) {
 		case "ok":
-			$("#wait_" + i).hide()
-			$("#correct_" + i).hide()
-			$("#wrong_" + i).hide()
-			$("#neutral_" + i).hide()
-			$("#ok_" + i).show()			
+			$("#wait_" + player).hide()
+			$("#correct_" + player).hide()
+			$("#wrong_" + player).hide()
+			$("#neutral_" + player).hide()
+			$("#ok_" + player).show()			
 			break
 		case "waiting":
-			$("#ok_" + i).hide()
-			$("#correct_" + i).hide()
-			$("#wrong_" + i).hide()
-			$("#neutral_" + i).hide()
-			$("#wait_" + i).show()			
+			$("#ok_" + player).hide()
+			$("#correct_" + player).hide()
+			$("#wrong_" + player).hide()
+			$("#neutral_" + player).hide()
+			$("#wait_" + player).show()			
 			break
 		case "correct":
-			$("#wait_" + i).hide()
-			$("#ok_" + i).hide()
-			$("#wrong_" + i).hide()
-			$("#neutral_" + i).hide()
-			$("#correct_" + i).show()
+			$("#wait_" + player).hide()
+			$("#ok_" + player).hide()
+			$("#wrong_" + player).hide()
+			$("#neutral_" + player).hide()
+			$("#correct_" + player).show()
 			break
 		case "wrong":	
-			$("#wait_" + i).hide()
-			$("#ok_" + i).hide()
-			$("#correct_" + i).hide()
-			$("#neutral_" + i).hide()
-			$("#wrong_" + i).show()
+			$("#wait_" + player).hide()
+			$("#ok_" + player).hide()
+			$("#correct_" + player).hide()
+			$("#neutral_" + player).hide()
+			$("#wrong_" + player).show()
 			break
 		case "neutral":
-			$("#neutral_" + i).show()
-			$("#wait_" + i).hide()
-			$("#ok_" + i).hide()
-			$("#correct_" + i).hide()
-			$("#wrong_" + i).hide()
+			$("#neutral_" + player).show()
+			$("#wait_" + player).hide()
+			$("#ok_" + player).hide()
+			$("#correct_" + player).hide()
+			$("#wrong_" + player).hide()
 			break
 		default:
-			$("#wait_" + i).hide()
-			$("#ok_" + i).hide()
-			$("#correct_" + i).hide()
-			$("#wrong_" + i).hide()
-			$("#neutral_" + i).hide()			
+			$("#wait_" + player).hide()
+			$("#ok_" + player).hide()
+			$("#correct_" + player).hide()
+			$("#wrong_" + player).hide()
+			$("#neutral_" + player).hide()			
 	}
 }
 
@@ -161,7 +162,13 @@ function setupPanels(mode) {
 			resetOrderButtons()
 			break
 		case "multifirst":
-			$("#counter").html("<h1>" + state.title + "<br/>Snelste<br/>Multiple Choice</h1>")
+			$("#counter").html("<h1>" + state.title + "<br/>Multiple Choice<br/>Snelste</h1>")
+			$(".scoreWrapper").hide()
+			$(".orderWrapper").hide()
+			resetOrderButtons()
+			break
+		case "multisteal":
+			$("#counter").html("<h1>" + state.title + "<br/>Multiple Choice<br/>Stelen</h1>")
 			$(".scoreWrapper").hide()
 			$(".orderWrapper").hide()
 			resetOrderButtons()
@@ -276,6 +283,44 @@ function fillPlayerGrid(mode) {
 							displayStatus(i, "neutral")
 						} else {
 							displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
+						}
+						break
+					default:
+						$("#status_"+i).css({backgroundColor: "white"})
+						displayStatus(i)
+				}
+				break
+			case "multisteal":
+				switch(state.modus) {
+					case "active":
+						$("#status_"+i).css({backgroundColor: "white"})
+						if (state.selectedButtons[i] != "none") {
+							if(state.selectedButtons[i] == state.solution) {
+								displayStatus(i, "correct")
+							} else {
+								displayStatus(i, "wrong")
+							}
+						} else {
+							displayStatus(i, "waiting")					
+						}
+						break
+					case "finished":
+						if(state.selectedButtons[i] == "none") {
+							$("#status_"+i).css({backgroundColor: "white"})
+							displayStatus(i, "neutral")
+						} else {
+							$("#status_"+i).css({backgroundColor: state.selectedButtons[i]})
+							displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
+						}
+						break
+					case "results":
+						$("#status_"+i).css({backgroundColor: "white"})
+						if(parseInt(state.scoresDelta[i]) > 0) {
+							displayStatus(i, "correct")
+						} else if(parseInt(state.scoresDelta[i]) < 0) {
+							displayStatus(i, "wrong")
+						} else {
+							displayStatus(i)
 						}
 						break
 					default:
@@ -408,4 +453,11 @@ socket.on('audioFiles', function(msg) {
 //		audio[i].load()
 	}	
 //	console.log("Audio files", audio)
+})
+
+// Receive flashing status
+socket.on('flash', function(msg) {
+	displayStatus(msg, "ok")
+	displayStatus(flash)
+	flash = msg
 })

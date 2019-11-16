@@ -73,11 +73,16 @@ $(function(){
 	
 	// Set waiting modus
 	$("#buttonWaiting").click(function() {
-		state.modus = "waiting"
-		state.flashing = true
-		socket.emit('updateStatus', state)
 		if(state.modus == "results") {
+			state.modus = "waiting"
+			state.flashing = true
+			socket.emit('updateStatus', state)
+			console.log("socket.emit('nextQuestion')")
 			socket.emit('nextQuestion')
+		} else {
+			state.modus = "waiting"
+			state.flashing = true
+			socket.emit('updateStatus', state)			
 		}
     })
 	
@@ -258,6 +263,7 @@ function deactivateMenuChoices() {
 	switch($("#questionmode").val()) {
 		case "multiple":
 		case "multifirst":
+		case "multisteal":
 			$('.radio').show()
 			$('#solutionOrderWrapper').hide()
 			$('#solutionBuzzerWrapper').hide()
