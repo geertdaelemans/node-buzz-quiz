@@ -108,3 +108,7 @@ latestStatus.txt
 
 # Dataset of questions
 questions.txt
+
+# Media-folder
+public/media/*
+!public/media/put-here-your-media.txt
