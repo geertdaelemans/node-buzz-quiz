@@ -28,6 +28,16 @@ h1 {
     margin: 0px;
 }
 
+img {
+  display: block;
+  padding: 10px;
+  max-width:90%;
+  max-height:90%;
+  width: auto;
+  height: auto;
+    margin-left: auto;
+  margin-right: auto;
+}
 
 .singleContainer {
 	height: 100%;
@@ -65,7 +75,7 @@ h1 {
 	text-align: center;
 }
 
-.answer {
+.answer, .answermulti {
 	padding: 5px;
 	height: 100%;
     margin: 0px;
@@ -77,6 +87,20 @@ h1 {
 	font-family: 'Comfortaa', sans-serif;
 	text-align: center;
 	border-radius: 50px;
+}
+
+
+.solutionMultiWrapper {
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.answermulti {
+	display: block;
+	height: auto;
+	width: 60%;
 }
 
 .blue {

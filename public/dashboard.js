@@ -92,6 +92,9 @@ $(function(){
 		state.modus = "waiting"
 		state.flashing = true
 		socket.emit('updateStatus', state)
+		if(state.modus == "results") {
+			socket.emit('nextQuestion')
+		}
     })
 	
 	// Set ready modus
@@ -127,7 +130,6 @@ $(function(){
 		state.modus = "results"
 		socket.emit('updateStatus', state)
 		socket.emit('results')
-		socket.emit('nextQuestion')
     })	
 	
 	// Update question

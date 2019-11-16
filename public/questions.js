@@ -36,6 +36,8 @@ var state = {
 	flashing: true
 }
 
+const colorCode = ["blue", "orange", "green", "yellow"]
+
 $(function(){
 	socket.emit('getStatus')	
 })
@@ -70,43 +72,76 @@ function activatePanel(name) {
 		$("#singlePanel").hide()
 		$("#multiplePanel").hide()
 		$("#resultsPanel").hide()
-		$("#waitingPanel").show()	// Active
+		$("#multipleResultsPanel").hide()
+		$("#waitingPanel").show()			// Active
 		break
 	case "ready":
 		$("#waitingPanel").hide()
 		$("#singlePanel").hide()
 		$("#multiplePanel").hide()
 		$("#resultsPanel").hide()
-		$("#readyPanel").show()		// Active
+		$("#multipleResultsPanel").hide()
+		$("#readyPanel").show()				// Active
 		break
 	case "open":
 		$("#waitingPanel").hide()
 		$("#readyPanel").hide()
 		$("#multiplePanel").hide()
 		$("#resultsPanel").hide()
-		$("#singlePanel").show()	// Active
+		$("#multipleResultsPanel").hide()
+		$("#singlePanel").show()			// Active
 		break
 	case "multiple":
 		$("#waitingPanel").hide()
 		$("#readyPanel").hide()
 		$("#singlePanel").hide()
 		$("#resultsPanel").hide()
-		$("#multiplePanel").show()	// Active
+		$("#multipleResultsPanel").hide()
+		$("#multiplePanel").show()			// Active
 		break
 	case "answer":
 		$("#waitingPanel").hide()
 		$("#readyPanel").hide()
 		$("#singlePanel").hide()
 		$("#multiplePanel").hide()
-		$("#resultsPanel").show()	// Active
+		$("#multipleResultsPanel").hide()
+		$("#resultsPanel").show()			// Active
+		break
+	case "multianswer":
+		$("#waitingPanel").hide()
+		$("#readyPanel").hide()
+		$("#singlePanel").hide()		
+		$("#multiplePanel").hide()
+		$("#resultsPanel").hide()
+		$("#multipleResultsPanel").show()	// Active
 		break
 	default:
 		$("#readyPanel").hide()
 		$("#singlePanel").hide()		
 		$("#multiplePanel").hide()
 		$("#resultsPanel").hide()
-		$("#waitingPanel").show()	// Active
+		$("#multipleResultsPanel").hide()
+		$("#waitingPanel").show()			// Active
 	}
+}
+
+function getImageInfo(string) {
+	const regExp = /\[([^)]+)\]/;
+	let matches = string.match(regExp)
+	if(matches != null) {
+		let imageArray = matches[1].split(':')
+		if(imageArray[0] == "img") {
+			return 'media/' + imageArray[1]
+		} else {
+			return null
+		} 
+	} else {
+		return null
+	}
+}
+
+function stripImageTags(string) {
+	return string.replace(/ *\[[^)]*\] */g, "")
 }
 
 // Refresh the questions page
@@ -123,18 +158,77 @@ function refreshPage() {
 		case "finished":
 			if(state.questionMode == "buzzer") {
 				activatePanel("open")
-				$("#questionSingle").html(state.currentQuestion.question)
+				$("#questionSingle").html(stripImageTags(state.currentQuestion.question))
 			} else {
 				activatePanel("multiple")
-				$("#questionMultiple").html(state.currentQuestion.question)
-				$("#answerBlue").html(state.currentQuestion.answers[0])
-				$("#answerOrange").html(state.currentQuestion.answers[1])
-				$("#answerGreen").html(state.currentQuestion.answers[2])
-				$("#answerYellow").html(state.currentQuestion.answers[3])
+				$("#questionMultiple").html(stripImageTags(state.currentQuestion.question))
+				if(stripImageTags(state.currentQuestion.answers[0]).length > 0) {
+					$("#answerBlue").html('<div class="answer" style="width: 50%">' + stripImageTags(state.currentQuestion.answers[0]) + '</div>')
+				} else {
+					$("#answerBlue").html('')
+				}
+				let imageName = getImageInfo(state.currentQuestion.answers[0])
+				if(imageName) {
+					$("#answerBlue").append('<img src="' + imageName + '" />')
+				}
+				$("#answerOrange").html(stripImageTags(state.currentQuestion.answers[1]))
+				if(stripImageTags(state.currentQuestion.answers[1]).length > 0) {
+					$("#answerOrange").html('<div class="answer" style="width: 50%">' + stripImageTags(state.currentQuestion.answers[1]) + '</div>')
+				} else {
+					$("#answerOrange").html('')
+				}
+				imageName = getImageInfo(state.currentQuestion.answers[1])
+				if(imageName) {
+					$("#answerOrange").append('<img src="' + imageName + '" />')
+				}
+				$("#answerGreen").html(stripImageTags(state.currentQuestion.answers[2]))
+				if(stripImageTags(state.currentQuestion.answers[2]).length > 0) {
+					$("#answerGreen").html('<div class="answer" style="width: 50%">' + stripImageTags(state.currentQuestion.answers[2]) + '</div>')
+				} else {
+					$("#answerGreen").html('')
+				}
+				imageName = getImageInfo(state.currentQuestion.answers[2])
+				if(imageName) {
+					$("#answerGreen").append('<img src="' + imageName + '" />')
+				}
+				$("#answerYellow").html(stripImageTags(state.currentQuestion.answers[3]))
+				if(stripImageTags(state.currentQuestion.answers[3]).length > 0) {
+					$("#answerYellow").html('<div class="answer" style="width: 50%">' + stripImageTags(state.currentQuestion.answers[3]) + '</div>')
+				} else {
+					$("#answerYellow").html('')
+				}
+				imageName = getImageInfo(state.currentQuestion.answers[3])
+				if(imageName) {
+					$("#answerYellow").append('<img src="' + imageName + '" />')
+				}
 			}
 			break
 		case "results":
-			activatePanel("answer")
+			switch(state.questionMode) {
+				case "multiple":
+				case "multifirst":
+					$('#answer').html(state.currentQuestion.answers[state.currentQuestion.solution])
+					activatePanel("answer")
+					break
+				case "buzzer":
+					$('#answer').html(state.currentQuestion.solutionBuzzer)
+					activatePanel("answer")
+					break
+				case "inorder":
+					let solutionArray = state.currentQuestion.solutionOrder.split('-')
+					for(let i = 0; i < solutionArray.length; i++) {
+						let answerString = state.currentQuestion.answers[colorCode.indexOf(solutionArray[i])]
+						let imageName = getImageInfo(answerString)
+						if(imageName) {
+							$('#answer' + i).html('<div>' + stripImageTags(answerString) + '</div><div><img src="' + imageName +'" /></div>')
+						} else {
+							$('#answer' + i).html(stripImageTags(answerString))
+						}
+						$('#answer' + i).attr("class", solutionArray[i] + " " + "answermulti")
+					}
+					activatePanel("multianswer")
+					break
+			}
 			break
 		default:
 			activatePanel("waiting")

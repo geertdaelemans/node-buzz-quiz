@@ -235,7 +235,7 @@ function fillPlayerGrid(mode) {
 						break						
 					case "results":
 						if(state.selectedButtons[i] == "none") {
-							displayStatus(i, "neutral")
+							displayStatus(i)
 						} else {
 							displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
 						}
