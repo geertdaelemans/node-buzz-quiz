@@ -213,14 +213,14 @@ function setupPage() {
 		// Total score
 		$("#player_" + i).append('<input type="number" id="score_' + i + '" class="playerScore" name="' + i + '"/>')
 		$("#score_" + i).change(function(){
-			state.scores[$(this).attr('name')] = $(this).val()
+			state.scores[$(this).attr('name')] = parseInt($(this).val())
 			socket.emit('updateStatus', state)
 		})
 		
 		// Points gained at last question (before addition to total score) aka Delta
 		$("#player_" + i).append('<input type="number" id="delta_' + i + '" class="playerScore" name="' + i + '"/>')
 		$("#delta_" + i).change(function(){
-			state.scoresDelta[$(this).attr('name')] = $(this).val()
+			state.scoresDelta[$(this).attr('name')] = parseInt($(this).val())
 			socket.emit('updateStatus', state)
 		})
 		
