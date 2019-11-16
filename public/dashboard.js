@@ -65,27 +65,11 @@ $(function(){
 		socket.emit('addScores')
 	})	
 
-	// Display scoreboard
-	$("#scoreboard").click(function() {
-		state.questionMode = "scoreboard"
-		state.flashing = true
-		socket.emit('updateStatus', state)
-	})
-	
 	// Change flashing mode
 	$("#flashing").change(function() {
         state.flashing = this.checked
 		socket.emit('updateStatus', state)
     });
-
-	// Start question mode
-	$("#buttonStart").click(function() {
-		updateCurrentQuestion()
-		state.title = $("#title").val()
-		state.questionMode = $("#questionmode").val()
-		socket.emit('updateStatus', state)
-		socket.emit('start')
-    })
 	
 	// Set waiting modus
 	$("#buttonWaiting").click(function() {
@@ -409,10 +393,9 @@ function refreshPage() {
 	$("#remarks").val(state.currentQuestion.remarks);
 
 	if(state.modus == "active") {
-		$("#scoreboard").hide()
 		$("#addScores").hide()
 	} else {
-		$("#scoreboard").show()
+		// Check if there are any delta's registered
 		let delta = false
 		for(var i = 0; i < state.numberOfPlayers; i++) {
 			if(parseInt(state.scoresDelta[i]) != 0) {
@@ -439,11 +422,6 @@ function refreshPage() {
 		$("#delta_"+i).val(state.scoresDelta[i])
 		$("#name_"+i).val(state.names[i])
 		$("#rank_"+i).html(state.speedSequence[i])
-	}
-	if(state.modus == "active") {
-		$("#buttonStart").html('Evalueer')
-	} else {
-		$("#buttonStart").html('Start')
 	}
 	selectQuestion(state.currentQuestion.id)
 	

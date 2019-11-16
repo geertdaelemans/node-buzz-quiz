@@ -73,23 +73,6 @@ var state = {
 	flashing: true
 }
 
-/*
-CODE SNIPPET TO GENERATE EXAMPLE QUESTIONS
-
-question.answer[0] = 'blue';
-question.answer[1] = 'orange';
-question.answer[2] = 'green';
-question.answer[3] = 'yellow';
-
-var round = []
-round[0] = question
-round[1] = question
-
-util.log("Writing file with contens", round)
-
-storeData(round, "sample.txt")
-*/
-
 // Load questions
 var questions = loadData("questions.txt")
 if(!questions) {
@@ -271,11 +254,6 @@ app.get('/questions', (req, res) => {
 // Initialize Buzz controllers
 const buzz = new Buzz({});
 state.numberOfPlayers = buzz.getNumberOfControllers();
-
-if(state.numberOfPlayers == 0) {
-	util.log("Similation mode started.")
-	state.numberOfPlayers = 8
-}
 
 // Idle animation which turns on each LED in turn.
 var flashIndex = -1
@@ -561,4 +539,9 @@ buzz.on("buttonup",function(event) {
 	sendStatus()
 })
 
-util.log("Ready! Press a button on any controller!")
+if(state.numberOfPlayers == 0) {
+	util.log("Simulation mode started.")
+	state.numberOfPlayers = 8
+} else {
+	util.log("Ready! Press a button on any controller!")
+}
