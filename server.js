@@ -10,7 +10,7 @@ const storeData = (data, path) => {
   try {
     fs.writeFileSync(path, JSON.stringify(data))
   } catch (err) {
-    util.error(err)
+    util.log("Error: ", err)
   }
 }
 
@@ -18,7 +18,7 @@ const loadData = (path) => {
   try {
     return JSON.parse(fs.readFileSync(path, 'utf8'))
   } catch (err) {
-    util.error(err)
+    util.log(`Error: not able to load ${path}.`)
     return false
   }
 }
@@ -92,11 +92,16 @@ storeData(round, "sample.txt")
 
 // Load questions
 var questions = loadData("questions.txt")
+if(!questions) {
+	questions = loadData("sample.txt")
+	storeData(questions, "questions.txt")
+	util.log(`Loading sample file.`)
+}
 util.log(questions.length + ' questions loaded.')
 
 // Listen on every connection
 io.on('connection', function(socket) {
-	util.log('User connected: ' + socket.id)
+	util.log(`User connected: ${socket.id}.`)
 	
 	// Default username
 	socket.username = "Anonymous"
@@ -266,6 +271,11 @@ app.get('/questions', (req, res) => {
 // Initialize Buzz controllers
 const buzz = new Buzz({});
 state.numberOfPlayers = buzz.getNumberOfControllers();
+
+if(state.numberOfPlayers == 0) {
+	util.log("Similation mode started.")
+	state.numberOfPlayers = 8
+}
 
 // Idle animation which turns on each LED in turn.
 var flashIndex = -1
