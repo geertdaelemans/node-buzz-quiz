@@ -459,12 +459,14 @@ buzz.on("buttondown",function(event) {
 				// Register pushed button
 				state.selectedButtons[event.controllerId] = event.button
 				state.numberOfReplies++
-				state.speedSequence[event.controllerId] = state.numberOfReplies
 				
 				// Player has submitted answer, which is instantly evaluated
 				if(event.button == colorCode[state.currentQuestion.solution]) {
 					state.correct[event.controllerId] = true
 					state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+				} else {
+					state.correct[event.controllerId] = false
+					state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)					
 				}
 				
 				// Turn red light off
@@ -512,7 +514,9 @@ buzz.on("buttondown",function(event) {
 							score = state.currentQuestion.scoreArray[state.currentQuestion.scoreArray.length - 1]
 						}
 						state.scoresDelta[event.controllerId] = parseInt(score)
-					}					
+					} else {
+						state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+					}				
 				} else {
 					// One player has submitted a correct answer and all stops
 					if(event.button == colorCode[state.currentQuestion.solution]) {
@@ -590,6 +594,9 @@ buzz.on("buttondown",function(event) {
 					if(state.selectedButtons[event.controllerId] == state.currentQuestion.solutionOrder) {
 						state.correct[event.controllerId] = true
 						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+					} else {
+						state.correct[event.controllerId] = false
+						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.scoreMinus)						
 					}
 					state.lightState[event.controllerId] = false
 					state.numberOfReplies++
