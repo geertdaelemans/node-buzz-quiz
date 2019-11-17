@@ -268,12 +268,12 @@ function deactivateMenuChoices() {
 		case "multisteal":
 			$('.radio').show()
 			$('#solutionOrderWrapper').hide()
-			$('#solutionBuzzerWrapper').hide()
+			$('#solutionBuzzerWrapper').show()
 			$('#solutionMultiWrapper').show()			
 			break
 		case "inorder":
 			$('.radio').hide()
-			$('#solutionBuzzerWrapper').hide()
+			$('#solutionBuzzerWrapper').show()
 			$('#solutionOrderWrapper').show()
 			$('#solutionMultiWrapper').show()			
 			break

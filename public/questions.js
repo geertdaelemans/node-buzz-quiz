@@ -247,11 +247,31 @@ function refreshPage() {
 				case "multiple":
 				case "multifirst":
 				case "multisteal":
-					$('#answer').html(state.currentQuestion.answers[state.currentQuestion.solution])
+					if(state.currentQuestion.solutionBuzzer) {
+						if(stripImageTags(state.currentQuestion.solutionBuzzer).length > 0) {
+							$("#answer").html(stripImageTags(state.currentQuestion.solutionBuzzer))
+						} else {
+							$("#answer").html('')
+						}
+						let imageName = getImageInfo(state.currentQuestion.solutionBuzzer)
+						if(imageName) {
+							$("#answer").append('<img src="' + imageName + '" />')
+						}
+					} else {
+						$('#answer').html(state.currentQuestion.answers[state.currentQuestion.solution])
+					}
 					activatePanel("answer")
 					break
 				case "buzzer":
-					$('#answer').html(state.currentQuestion.solutionBuzzer)
+					if(stripImageTags(state.currentQuestion.solutionBuzzer).length > 0) {
+						$("#answer").html(stripImageTags(state.currentQuestion.solutionBuzzer))
+					} else {
+						$("#answer").html('')
+					}
+					let imageName = getImageInfo(state.currentQuestion.solutionBuzzer)
+					if(imageName) {
+						$("#answer").append('<img src="' + imageName + '" />')
+					}
 					activatePanel("answer")
 					break
 				case "inorder":
