@@ -28,6 +28,7 @@ var question = {
 	score: 0,
 	scoreMinus: 0,
 	scoreArray: [],
+	timer: 10,
 	remarks: 'none'
 }
 
@@ -148,6 +149,10 @@ function resetOrderButtons() {
 }
 
 function setupPanels(mode) {
+	if(state.modus != 'active') {
+		$("#counter").css('font-size', '40px')
+		$("#counter").css('color', 'black')
+	}
 	switch(mode) {
 		case "scoreboard":
 			$("#counter").html("Videotechnologie<br/>QUIZ")
@@ -460,4 +465,14 @@ socket.on('flash', function(msg) {
 	displayStatus(msg, "ok")
 	displayStatus(flash)
 	flash = msg
+})
+
+// Receive clock ticks
+socket.on('clock', function(msg) {
+	$("#counter").css('font-size', 120)
+	if(msg < 3) {
+		$("#counter").css('color', 'red')
+	}
+	$("#counter").html(msg)
+	console.log("Clock: ", msg)
 })

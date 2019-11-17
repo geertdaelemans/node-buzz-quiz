@@ -16,6 +16,7 @@ var question = {
 	score: 0,
 	scoreMinus: 0,
 	scoreArray: [],
+	timer: 10,
 	remarks: 'none'
 }
 
@@ -179,6 +180,7 @@ function updateCurrentQuestion() {
 		// or return +value; which handles float values as well
 	})
 	state.currentQuestion.scoreArray = ArrayData
+	state.currentQuestion.timer = parseInt($("#timer").val())
 	state.currentQuestion.remarks = $("#remarks").val()
 }
 
@@ -396,6 +398,7 @@ function refreshPage() {
 	$("#solutionOrder3").val(solutionOrder[3])
 	$("#solutionOrder3").css("background-color", solutionOrder[3])
 	$("#solutionBuzzer").val(state.currentQuestion.solutionBuzzer)
+	$("#timer").val(state.currentQuestion.timer)
 	$("#remarks").val(state.currentQuestion.remarks);
 
 	if(state.modus == "active") {

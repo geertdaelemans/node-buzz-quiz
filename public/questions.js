@@ -16,6 +16,7 @@ var question = {
 	score: 0,
 	scoreMinus: 0,
 	scoreArray: [],
+	timer: 10,
 	remarks: 'none'
 }
 

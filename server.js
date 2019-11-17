@@ -52,6 +52,7 @@ var question = {
 	score: 0,
 	scoreMinus: 0,
 	scoreArray: [],
+	timer: 10,
 	remarks: 'none'
 }
 
@@ -88,6 +89,10 @@ var flash = 0
 
 // Winner index
 var winnerIndex = 0
+
+// Clock counter
+var clockCounter = 0
+var clockActive = false
 
 // Listen on every connection
 io.on('connection', function(socket) {
@@ -313,6 +318,19 @@ setInterval(function() {
 	}
 }, 100)
 
+setInterval(function() {
+	if(clockActive) {
+		io.emit('clock', clockCounter)
+		if(clockCounter > 0) {		
+			clockCounter--
+		} else {
+			clockActive = false
+			state.modus = "finished"
+			evaluateQuestion()
+		}
+	}
+}, 1000)
+
 
 // Send status to client(s)
 function sendStatus(clientID) {
@@ -326,6 +344,12 @@ function sendStatus(clientID) {
 
 // Start question
 function startQuestion() {
+	if(state.currentQuestion.timer) {
+		clockCounter = state.currentQuestion.timer
+	} else {
+		clockCounter = 10
+	}
+	clockActive = true
 	switch(state.questionMode) {
 		case "multiple":
 		case "multifirst":
@@ -343,6 +367,8 @@ function startQuestion() {
 
 // Evaluate question
 function evaluateQuestion() {
+	state.modus = "finished"
+	clockActive = false
 	if(state.modus != "buzzer") {
 		allLights(false)
 		state.flashing = true
