@@ -169,19 +169,43 @@ function refreshPage() {
 		case "finished":
 			if(state.questionMode == "buzzer") {
 				activatePanel("open")
-				$("#questionSingle").html(stripImageTags(state.currentQuestion.question))
+				
+				// Question
+				if(stripImageTags(state.currentQuestion.question).length > 0) {
+					$("#questionSingle").html(stripImageTags(state.currentQuestion.question))
+				} else {
+					$("#questionSingle").html('')
+				}
+				let imageName = getImageInfo(state.currentQuestion.question)
+				if(imageName) {
+					$("#questionSingle").append('<img src="' + imageName + '" />')
+				}
 			} else {
 				activatePanel("multiple")
-				$("#questionMultiple").html(stripImageTags(state.currentQuestion.question))
+				
+				// Question
+				if(stripImageTags(state.currentQuestion.question).length > 0) {
+					$("#questionMultiple").html(stripImageTags(state.currentQuestion.question))
+				} else {
+					$("#questionMultiple").html('')
+				}
+				let imageName = getImageInfo(state.currentQuestion.question)
+				if(imageName) {
+					$("#questionMultiple").append('<img src="' + imageName + '" />')
+				}
+				
+				// Blue answer
 				if(stripImageTags(state.currentQuestion.answers[0]).length > 0) {
 					$("#answerBlue").html('<div class="answer" style="width: 50%">' + stripImageTags(state.currentQuestion.answers[0]) + '</div>')
 				} else {
 					$("#answerBlue").html('')
 				}
-				let imageName = getImageInfo(state.currentQuestion.answers[0])
+				imageName = getImageInfo(state.currentQuestion.answers[0])
 				if(imageName) {
 					$("#answerBlue").append('<img src="' + imageName + '" />')
 				}
+				
+				// Orange answer
 				$("#answerOrange").html(stripImageTags(state.currentQuestion.answers[1]))
 				if(stripImageTags(state.currentQuestion.answers[1]).length > 0) {
 					$("#answerOrange").html('<div class="answer" style="width: 50%">' + stripImageTags(state.currentQuestion.answers[1]) + '</div>')
@@ -192,6 +216,8 @@ function refreshPage() {
 				if(imageName) {
 					$("#answerOrange").append('<img src="' + imageName + '" />')
 				}
+				
+				// Green answer
 				$("#answerGreen").html(stripImageTags(state.currentQuestion.answers[2]))
 				if(stripImageTags(state.currentQuestion.answers[2]).length > 0) {
 					$("#answerGreen").html('<div class="answer" style="width: 50%">' + stripImageTags(state.currentQuestion.answers[2]) + '</div>')
@@ -202,6 +228,8 @@ function refreshPage() {
 				if(imageName) {
 					$("#answerGreen").append('<img src="' + imageName + '" />')
 				}
+				
+				// Yellow answer
 				$("#answerYellow").html(stripImageTags(state.currentQuestion.answers[3]))
 				if(stripImageTags(state.currentQuestion.answers[3]).length > 0) {
 					$("#answerYellow").html('<div class="answer" style="width: 50%">' + stripImageTags(state.currentQuestion.answers[3]) + '</div>')
