@@ -55,7 +55,11 @@ function getQuestionMode() {
 		case "multiple":
 			return "Multiple Choice"
 		case "multifirst":
-			return "Multiple Choice<br/>De snelste wint"
+			if(state.currentQuestion.scoreArray[0] != null) {
+				return "Multiple Choice<br/>Hoe sneller, hoe meer punten"
+			} else {
+				return "Multiple Choice<br/>De snelste wint"
+			}
 		case "multisteal":
 			return "Multiple Choice<br/>De snelste steelt"
 		case "buzzer":

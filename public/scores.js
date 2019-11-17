@@ -150,42 +150,35 @@ function resetOrderButtons() {
 
 function setupPanels(mode) {
 	if(state.modus != 'active') {
-		$("#counter").css('font-size', '40px')
-		$("#counter").css('color', 'black')
+		$("#counter").html('')
 	}
 	switch(mode) {
 		case "scoreboard":
-			$("#counter").html("Videotechnologie<br/>QUIZ")
 			$(".orderWrapper").hide()
 			$(".scoreWrapper").show()
 			resetOrderButtons()
 			break
 		case "multiple":
-			$("#counter").html("<h1>" + state.title + "<br/>Multiple Choice</h1>")
 			$(".scoreWrapper").hide()
 			$(".orderWrapper").hide()
 			resetOrderButtons()
 			break
 		case "multifirst":
-			$("#counter").html("<h1>" + state.title + "<br/>Multiple Choice<br/>Snelste</h1>")
 			$(".scoreWrapper").hide()
 			$(".orderWrapper").hide()
 			resetOrderButtons()
 			break
 		case "multisteal":
-			$("#counter").html("<h1>" + state.title + "<br/>Multiple Choice<br/>Stelen</h1>")
 			$(".scoreWrapper").hide()
 			$(".orderWrapper").hide()
 			resetOrderButtons()
 			break
 		case "buzzer":
-			$("#counter").html("<h1>" + state.title + "<br/>Buzzer</h1>")
 			$(".scoreWrapper").hide()
 			$(".orderWrapper").hide()
 			resetOrderButtons()
 			break
 		case "inorder":
-			$("#counter").html("<h1>" + state.title + "<br/>In Volgorde</h1>")
 			$(".scoreWrapper").hide()
 			if(state.modus == "results") {
 				$(".orderWrapper").hide()
@@ -195,7 +188,6 @@ function setupPanels(mode) {
 			resetOrderButtons()
 			break
 		default:
-			$("#counter").html("Videotechnologie<br/>QUIZ")
 			$(".orderWrapper").hide()
 			resetOrderButtons()
 	}
@@ -260,32 +252,44 @@ function fillPlayerGrid(mode) {
 			case "multifirst":
 				switch(state.modus) {
 					case "active":
-						$("#status_"+i).css({backgroundColor: "white"})
-						if (state.selectedButtons[i] != "none") {
-							if(state.selectedButtons[i] == state.solution) {
-								displayStatus(i, "correct")
-							} else {
-								displayStatus(i, "wrong")
-							}
+						if(state.speedSequence[i] == 0) {
+							$("#ranking_"+i).css({backgroundColor: "white"})
+							$("#ranking_" + i).hide()
+							displayStatus(i, "waiting")
 						} else {
-							displayStatus(i, "waiting")					
+							$("#ranking_" + i).css({backgroundColor: "red"})
+							$("#ranking_" + i).html(state.speedSequence[i])
+							displayStatus(i)
+							$("#ranking_" + i).show()
 						}
 						break
 					case "finished":
-						if(state.selectedButtons[i] == "none") {
-							displayStatus(i, "neutral")
+						if(state.currentQuestion.scoreArray[0] != null) {
+							if(state.selectedButtons[i] == "none") {
+								displayStatus(i, "neutral")
+							} else {
+								$("#ranking_" + i).css({backgroundColor: state.selectedButtons[i]})
+								$("#ranking_" + i).html(state.speedSequence[i])
+								displayStatus(i)
+								$("#ranking_" + i).show()
+							}
 						} else {
-							displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
+							if(state.selectedButtons[i] != "none") {
+								displayStatus(i, "ok")
+							} else {
+								displayStatus(i)
+							}
 						}
 						break
 					case "results":
+						$("#ranking_" + i).hide()
 						if (state.selectedButtons[i] != "none") {
 							$("#status_"+i).css({backgroundColor: state.selectedButtons[i]})
 						} else {
 							$("#status_"+i).css({backgroundColor: "white"})
 						}
 						if(state.selectedButtons[i] == "none") {
-							displayStatus(i, "neutral")
+							displayStatus(i)
 						} else {
 							displayStatus(i, (state.correct[i] ? "correct" : "wrong"))
 						}
@@ -474,5 +478,4 @@ socket.on('clock', function(msg) {
 		$("#counter").css('color', 'red')
 	}
 	$("#counter").html(msg)
-	console.log("Clock: ", msg)
 })

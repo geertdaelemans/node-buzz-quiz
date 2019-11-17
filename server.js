@@ -493,13 +493,35 @@ buzz.on("buttondown",function(event) {
 				state.numberOfReplies++
 				state.speedSequence[event.controllerId] = state.numberOfReplies
 				
-				// One player has submitted a correct answer and all stops
-				if(event.button == colorCode[state.currentQuestion.solution]) {
-					state.correct[event.controllerId] = true
-					if(state.questionMode != "multisteal") {
-						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+				if(state.currentQuestion.scoreArray[0] != null && state.questionMode != "multisteal") {
+					// All players can submit a correct question
+					if(event.button == colorCode[state.currentQuestion.solution]) {
+						state.correct[event.controllerId] = true
+						let score = 0
+						let scoreIndex = -1
+						for(let i = 1; i <= state.numberOfReplies; i++) {
+							if(state.correct[state.speedSequence.indexOf(i)]) {
+								scoreIndex++
+							}
+						}
+						if(scoreIndex < state.currentQuestion.scoreArray.length) {
+							// Select element in scoreArray that matches position
+							score = state.currentQuestion.scoreArray[scoreIndex]
+						} else {
+							// Select last element from scoreArray
+							score = state.currentQuestion.scoreArray[state.currentQuestion.scoreArray.length - 1]
+						}
+						state.scoresDelta[event.controllerId] = parseInt(score)
+					}					
+				} else {
+					// One player has submitted a correct answer and all stops
+					if(event.button == colorCode[state.currentQuestion.solution]) {
+						state.correct[event.controllerId] = true
+						if(state.questionMode != "multisteal") {
+							state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+						}
+						evaluateQuestion()
 					}
-					evaluateQuestion()
 				}
 				
 				// Turn red light off
