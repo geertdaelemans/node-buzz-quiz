@@ -186,6 +186,11 @@ function updateCurrentQuestion() {
 
 // Initialize the dashboard page
 function setupPage() {
+	$("#numberPlayers").change(function(){
+		let number = $(this).val()
+		socket.emit('numberPlayers', number)
+	})
+	
 	$('#questionmode').change(function() {
 		deactivateMenuChoices()
 	})
@@ -377,6 +382,9 @@ function getMediaInfo(string) {
 
 // Refresh the dashboard page
 function refreshPage() {
+	
+	// Number of players
+	$("#numberPlayers").val(state.numberOfPlayers)
 
 	// Control panel
 	setModus()

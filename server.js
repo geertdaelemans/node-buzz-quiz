@@ -184,7 +184,7 @@ io.on('connection', function(socket) {
 				stealScores()
 			}
 		} else {
-			state.flashing = true
+			state.flashing = false
 		}
 	})
 	
@@ -265,6 +265,12 @@ io.on('connection', function(socket) {
 		io.emit('showVideo', msg)
 	})
 	
+	// Reveive changed number of players
+	socket.on('numberPlayers', function(msg) {
+		util.log('Changed number of players to', msg)
+		state.numberOfPlayers = msg
+	})
+	
 })
 
 // Routes
@@ -283,6 +289,7 @@ app.get('/questions', (req, res) => {
 // Initialize Buzz controllers
 const buzz = new Buzz({});
 state.numberOfPlayers = buzz.getNumberOfControllers();
+state.numberOfPlayers -= 1
 
 // Idle animation which turns on each LED in turn.
 var flashIndex = -1
@@ -456,168 +463,29 @@ function allLights(onOff) {
 
 // Light controllers with a button pressed down
 buzz.on("buttondown",function(event) {
-	var playerNumber = parseInt(event.controllerId) + 1
-	var playerName = `Buzz ${playerNumber}`
-	util.log(`${playerName} pushed ${event.button}`)
-	io.sockets.emit('new_message', {message : event.button, username : playerName, playerId : playerNumber})
-	if(event.button == "red") {
-		io.emit('sound', event.controllerId)
-	}
-	switch(state.questionMode) {
-		
-		// Simple multiple choice questions (no limits)
-		case "multiple":
-			// Player pushed multiple choice button once
-			if(state.modus == "active" &&
-			   state.selectedButtons[event.controllerId] == "none" &&
-			   event.button != "red") {
-				   
-				// Register pushed button
-				state.selectedButtons[event.controllerId] = event.button
-				state.numberOfReplies++
-				
-				// Player has submitted answer, which is instantly evaluated
-				if(event.button == colorCode[state.currentQuestion.solution]) {
-					state.correct[event.controllerId] = true
-					state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
-				} else {
-					state.correct[event.controllerId] = false
-					if(state.currentQuestion.scoreMinus) {
-						state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
-					}
-				}
-				
-				// Turn red light off
-				state.lightState[event.controllerId] = false
-				
-				// Update status 
-				sendStatus()
-				
-				// All players have submitted their answer
-				if(state.numberOfReplies == state.numberOfPlayers) {
-					evaluateQuestion()
-				}
-			}
-			break
-		
-		// Multiple choice, only fastest correct answer counts
-		case "multifirst":
-		case "multisteal":
-			// Player pushed multiple choice button once
-			if(state.modus == "active" &&
-			   state.selectedButtons[event.controllerId] == "none" &&
-			   event.button != "red") {
-				
-				// Register pushed button
-				state.selectedButtons[event.controllerId] = event.button
-				state.numberOfReplies++
-				state.speedSequence[event.controllerId] = state.numberOfReplies
-				
-				if(state.currentQuestion.scoreArray[0] != null && state.questionMode != "multisteal") {
-					// All players can submit a correct question
-					if(event.button == colorCode[state.currentQuestion.solution]) {
-						state.correct[event.controllerId] = true
-						let score = 0
-						let scoreIndex = -1
-						for(let i = 1; i <= state.numberOfReplies; i++) {
-							if(state.correct[state.speedSequence.indexOf(i)]) {
-								scoreIndex++
-							}
-						}
-						if(scoreIndex < state.currentQuestion.scoreArray.length) {
-							// Select element in scoreArray that matches position
-							score = state.currentQuestion.scoreArray[scoreIndex]
-						} else {
-							// Select last element from scoreArray
-							score = state.currentQuestion.scoreArray[state.currentQuestion.scoreArray.length - 1]
-						}
-						state.scoresDelta[event.controllerId] = parseInt(score)
-					} else {
-						if(state.currentQuestion.scoreMinus) {
-							state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
-						}
-					}				
-				} else {
-					// One player has submitted a correct answer and all stops
-					if(event.button == colorCode[state.currentQuestion.solution]) {
-						state.correct[event.controllerId] = true
-						if(state.questionMode != "multisteal") {
-							state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
-						}
-						evaluateQuestion()
-					}
-				}
-				
-				// Turn red light off
-				state.lightState[event.controllerId] = false
-				
-				// Update status
-				sendStatus()
-				
-				// All players have submitted their answer, all are wrong
-				if(state.numberOfReplies == state.numberOfPlayers) {
-					evaluateQuestion()
-				}
-			} else if(state.modus == "results" &&
-				      event.controllerId == winnerIndex &&
-					  event.button == "red") {
-				emitLight = false
-				let looserIndex = flash
-				let booty = parseInt(state.scores[looserIndex] * 0.1)
-				state.scoresDelta[looserIndex] = -booty
-				if(winnerIndex == looserIndex) {
-					util.log("Player " + (looserIndex + 1) + " looses.")					
-				} else {					
-					state.scoresDelta[winnerIndex] = booty
-					util.log("Player " + (looserIndex + 1) + " looses from player " + (winnerIndex + 1))
-				}
-			}
-			break		
-		
-		case "buzzer":
-			// Player pushed red button once
-			if(state.modus == "active" &&
-			   state.selectedButtons[event.controllerId] == "none" &&
-			   event.button == "red") {
-				   
-				// Register pushed button
-				state.selectedButtons[event.controllerId] = "red"
-				state.numberOfReplies++
-				state.speedSequence[event.controllerId] = state.numberOfReplies
-				
-				// First player to push leaves the red light on
-				if(state.numberOfReplies == 1) {
-					allLights(false)
-					state.correct[event.controllerId] = true
-					state.lightState[event.controllerId] = true
-				}
-				
-				// Update status 
-				sendStatus()
-				
-				// All players have submitted their answer
-				if(state.numberOfReplies == state.numberOfPlayers) {
-					evaluateQuestion()
-				}
-			}
-			break
+	if(event.controllerId < state.numberOfPlayers) {
+		var playerNumber = parseInt(event.controllerId) + 1
+		var playerName = `Buzz ${playerNumber}`
+		util.log(`${playerName} pushed ${event.button}`)
+		io.sockets.emit('new_message', {message : event.button, username : playerName, playerId : playerNumber})
+		if(event.button == "red") {
+			io.emit('sound', event.controllerId)
+		}
+		switch(state.questionMode) {
 			
-		// Set in order, a sequence of four unique buttons needs to be pushed
-		case "inorder":
-			if(state.modus == "active" &&
-			   event.button != "red" &&
-			   state.selectedButtons[event.controllerId].indexOf(event.button) == -1) {
-				   
-				// Register series of pushed buttons
-				if(state.selectedButtons[event.controllerId] == "none") {
+			// Simple multiple choice questions (no limits)
+			case "multiple":
+				// Player pushed multiple choice button once
+				if(state.modus == "active" &&
+				   state.selectedButtons[event.controllerId] == "none" &&
+				   event.button != "red") {
+					   
+					// Register pushed button
 					state.selectedButtons[event.controllerId] = event.button
-				} else {
-					state.selectedButtons[event.controllerId] = state.selectedButtons[event.controllerId] + "-" + event.button
-				}
-				
-				// Check if sequence of player inputs is complete and validate question
-				if(state.selectedButtons[event.controllerId].length == 24) {
-					if(state.selectedButtons[event.controllerId] == state.currentQuestion.solutionOrder) {
+					state.numberOfReplies++
+					
+					// Player has submitted answer, which is instantly evaluated
+					if(event.button == colorCode[state.currentQuestion.solution]) {
 						state.correct[event.controllerId] = true
 						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
 					} else {
@@ -626,42 +494,185 @@ buzz.on("buttondown",function(event) {
 							state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
 						}
 					}
+					
+					// Turn red light off
 					state.lightState[event.controllerId] = false
+					
+					// Update status 
+					sendStatus()
+					
+					// All players have submitted their answer
+					if(state.numberOfReplies == state.numberOfPlayers) {
+						evaluateQuestion()
+					}
+				}
+				break
+			
+			// Multiple choice, only fastest correct answer counts
+			case "multifirst":
+			case "multisteal":
+				// Player pushed multiple choice button once
+				if(state.modus == "active" &&
+				   state.selectedButtons[event.controllerId] == "none" &&
+				   event.button != "red") {
+					
+					// Register pushed button
+					state.selectedButtons[event.controllerId] = event.button
 					state.numberOfReplies++
+					state.speedSequence[event.controllerId] = state.numberOfReplies
+					
+					if(state.currentQuestion.scoreArray[0] != null && state.questionMode != "multisteal") {
+						// All players can submit a correct question
+						if(event.button == colorCode[state.currentQuestion.solution]) {
+							state.correct[event.controllerId] = true
+							let score = 0
+							let scoreIndex = -1
+							for(let i = 1; i <= state.numberOfReplies; i++) {
+								if(state.correct[state.speedSequence.indexOf(i)]) {
+									scoreIndex++
+								}
+							}
+							if(scoreIndex < state.currentQuestion.scoreArray.length) {
+								// Select element in scoreArray that matches position
+								score = state.currentQuestion.scoreArray[scoreIndex]
+							} else {
+								// Select last element from scoreArray
+								score = state.currentQuestion.scoreArray[state.currentQuestion.scoreArray.length - 1]
+							}
+							state.scoresDelta[event.controllerId] = parseInt(score)
+						} else {
+							if(state.currentQuestion.scoreMinus) {
+								state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+							}
+						}				
+					} else {
+						// One player has submitted a correct answer and all stops
+						if(event.button == colorCode[state.currentQuestion.solution]) {
+							state.correct[event.controllerId] = true
+							if(state.questionMode != "multisteal") {
+								state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+							}
+							evaluateQuestion()
+						}
+					}
+					
+					// Turn red light off
+					state.lightState[event.controllerId] = false
+					
+					// Update status
+					sendStatus()
+					
+					// All players have submitted their answer, all are wrong
+					if(state.numberOfReplies == state.numberOfPlayers) {
+						evaluateQuestion()
+					}
+				} else if(state.modus == "results" &&
+						  event.controllerId == winnerIndex &&
+						  event.button == "red") {
+					emitLight = false
+					let looserIndex = flash
+					let booty = parseInt(state.scores[looserIndex] * 0.1)
+					state.scoresDelta[looserIndex] = -booty
+					if(winnerIndex == looserIndex) {
+						util.log("Player " + (looserIndex + 1) + " looses.")					
+					} else {					
+						state.scoresDelta[winnerIndex] = booty
+						util.log("Player " + (looserIndex + 1) + " looses from player " + (winnerIndex + 1))
+					}
 				}
+				break		
+			
+			case "buzzer":
+				// Player pushed red button once
+				if(state.modus == "active" &&
+				   state.selectedButtons[event.controllerId] == "none" &&
+				   event.button == "red") {
+					   
+					// Register pushed button
+					state.selectedButtons[event.controllerId] = "red"
+					state.numberOfReplies++
+					state.speedSequence[event.controllerId] = state.numberOfReplies
+					
+					// First player to push leaves the red light on
+					if(state.numberOfReplies == 1) {
+						allLights(false)
+						state.correct[event.controllerId] = true
+						state.lightState[event.controllerId] = true
+					}
+					
+					// Update status 
+					sendStatus()
+					
+					// All players have submitted their answer
+					if(state.numberOfReplies == state.numberOfPlayers) {
+						evaluateQuestion()
+					}
+				}
+				break
 				
-				// Update status
+			// Set in order, a sequence of four unique buttons needs to be pushed
+			case "inorder":
+				if(state.modus == "active" &&
+				   event.button != "red" &&
+				   state.selectedButtons[event.controllerId].indexOf(event.button) == -1) {
+					   
+					// Register series of pushed buttons
+					if(state.selectedButtons[event.controllerId] == "none") {
+						state.selectedButtons[event.controllerId] = event.button
+					} else {
+						state.selectedButtons[event.controllerId] = state.selectedButtons[event.controllerId] + "-" + event.button
+					}
+					
+					// Check if sequence of player inputs is complete and validate question
+					if(state.selectedButtons[event.controllerId].length == 24) {
+						if(state.selectedButtons[event.controllerId] == state.currentQuestion.solutionOrder) {
+							state.correct[event.controllerId] = true
+							state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+						} else {
+							state.correct[event.controllerId] = false
+							if(state.currentQuestion.scoreMinus) {
+								state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+							}
+						}
+						state.lightState[event.controllerId] = false
+						state.numberOfReplies++
+					}
+					
+					// Update status
+					sendStatus()
+					
+					// All players have submitted their answer, all are wrong
+					if(state.numberOfReplies == state.numberOfPlayers) {
+						evaluateQuestion()
+					}
+					
+					util.log("Player " + (event.controllerId + 1) + " - " + state.selectedButtons[event.controllerId] + ".")
+				}
+				break
+			
+			default:
+				state.selectedButtons[event.controllerId] = event.button
+				state.lightState[event.controllerId] = true
+				buzz.light(state.lightState)
 				sendStatus()
-				
-				// All players have submitted their answer, all are wrong
-				if(state.numberOfReplies == state.numberOfPlayers) {
-					evaluateQuestion()
-				}
-				
-				util.log("Player " + (event.controllerId + 1) + " - " + state.selectedButtons[event.controllerId] + ".")
-			}
-			break
-		
-		default:
-			state.selectedButtons[event.controllerId] = event.button
-			state.lightState[event.controllerId] = true
-			buzz.light(state.lightState)
-			sendStatus()
+		}
 	}
 })
 
 // Button released, just for switching off the LED's
 buzz.on("buttonup",function(event) {
-	switch(state.questionMode) {
-		case "multiple":
-		case "buzzer":
-		case "inorder":
-			break
-		default:
-			state.lightState[event.controllerId] = false
+	if(event.controllerId < state.numberOfPlayers) {
+		switch(state.questionMode) {
+			case "multiple":
+			case "buzzer":
+			case "inorder":
+				break
+			default:
+				state.lightState[event.controllerId] = false
+		}
+		buzz.light(state.lightState)
+		sendStatus()
 	}
-    buzz.light(state.lightState)
-	sendStatus()
 })
 
 if(state.numberOfPlayers == 0) {
