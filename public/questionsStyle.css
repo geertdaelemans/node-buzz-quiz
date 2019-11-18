@@ -39,8 +39,13 @@ img {
   max-height:90%;
   width: auto;
   height: auto;
-    margin-left: auto;
+  margin-left: auto;
   margin-right: auto;
+}
+
+#answer img {
+	margin-right: 10px;
+	margin-left: 10px;
 }
 
 .singleContainer {
@@ -202,4 +207,10 @@ img {
 	justify-content: center;
 	background-color: red;
 	color: white;
+}
+
+.answerDuo {
+	padding: 10px;
+	  margin-left: auto;
+  margin-right: auto;
 }
