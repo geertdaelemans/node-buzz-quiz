@@ -571,7 +571,7 @@ buzz.on("buttondown",function(event) {
 						  event.button == "red") {
 					emitLight = false
 					let looserIndex = flash
-					let booty = parseInt(state.scores[looserIndex] * 0.1)
+					let booty = parseInt(state.scores[looserIndex] * 0.2)
 					state.scoresDelta[looserIndex] = -booty
 					if(winnerIndex == looserIndex) {
 						util.log("Player " + (looserIndex + 1) + " looses.")					
