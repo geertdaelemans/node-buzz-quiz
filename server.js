@@ -410,12 +410,15 @@ function calculateBuzzer() {
 				state.scoresDelta[playerIndex] = parseInt(state.currentQuestion.score)
 				break
 			} else {
-				state.scoresDelta[playerIndex] = -parseInt(state.currentQuestion.scoreMinus)
+				if(state.currentQuestion.scoreMinus) {
+					state.scoresDelta[playerIndex] = -parseInt(state.currentQuestion.scoreMinus)
+				}
 			}
 		} else {
 			break
 		}
 	}
+	sendStatus()
 }
 
 // Steal scores
@@ -477,7 +480,9 @@ buzz.on("buttondown",function(event) {
 					state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
 				} else {
 					state.correct[event.controllerId] = false
-					state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)					
+					if(state.currentQuestion.scoreMinus) {
+						state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+					}
 				}
 				
 				// Turn red light off
@@ -526,7 +531,9 @@ buzz.on("buttondown",function(event) {
 						}
 						state.scoresDelta[event.controllerId] = parseInt(score)
 					} else {
-						state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+						if(state.currentQuestion.scoreMinus) {
+							state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+						}
 					}				
 				} else {
 					// One player has submitted a correct answer and all stops
@@ -607,7 +614,9 @@ buzz.on("buttondown",function(event) {
 						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
 					} else {
 						state.correct[event.controllerId] = false
-						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.scoreMinus)						
+						if(state.currentQuestion.scoreMinus) {
+							state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+						}
 					}
 					state.lightState[event.controllerId] = false
 					state.numberOfReplies++
