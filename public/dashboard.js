@@ -433,6 +433,11 @@ function refreshPage() {
 					var value = $(this).val()
 					socket.emit('video', value)
 				})
+			} else if(mediaArray[i][0] == 'audio') {
+				$("#media_" + i).click(function(){
+					var value = $(this).val()
+					socket.emit('audio', value)
+				})				
 			} else {
 				$("#media_" + i).click(function(){
 					var value = $(this).val()

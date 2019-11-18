@@ -340,13 +340,11 @@ socket.on('showImg', function(msg) {
 		$('body').css('background-image', 'url("")')
 		imageBackground = "none"
 	}
-	console.log(imageFile)
 })
 
 // Receive background video
 socket.on('showVideo', function(msg) {
 	let videoFile = "media/" + msg
-	console.log(videoFile)
 	if(videoPlaying != videoFile) {
 		$('#backgroundVideo').attr('src', videoFile)
 		$('#backgroundVideo').show()
@@ -364,6 +362,21 @@ socket.on('showVideo', function(msg) {
     	$('#backgroundVideo').hide()    
 
     });*/
-
-	console.log(msg)
 })
+
+// Receive background audio
+socket.on('showAudio', function(msg) {
+	let videoFile = "media/" + msg
+	if(videoPlaying != videoFile) {
+		$('#backgroundVideo').attr('src', videoFile)
+		$('#backgroundVideo').hide()
+		$("#backgroundVideo")[0].load();
+		$("#backgroundVideo")[0].play();
+		videoPlaying = videoFile
+	} else {
+		$("#backgroundVideo")[0].pause()
+		$('#backgroundVideo').hide()
+		videoPlaying = "none"
+	}
+})
+

@@ -265,6 +265,11 @@ io.on('connection', function(socket) {
 		io.emit('showVideo', msg)
 	})
 	
+	// Receive background audio
+	socket.on('audio', function(msg) {
+		io.emit('showAudio', msg)
+	})
+	
 	// Reveive changed number of players
 	socket.on('numberPlayers', function(msg) {
 		util.log('Changed number of players to', msg)
