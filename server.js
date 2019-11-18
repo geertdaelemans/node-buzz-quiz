@@ -183,6 +183,8 @@ io.on('connection', function(socket) {
 			if(state.correct.includes(true)) {
 				stealScores()
 			}
+		} else {
+			state.flashing = true
 		}
 	})
 	
@@ -382,7 +384,7 @@ function evaluateQuestion() {
 	clockActive = false
 	if(state.modus != "buzzer") {
 		allLights(false)
-		state.flashing = true
+		state.flashing = false
 	}
 	switch(state.questionMode) {
 		case "multiple":
@@ -586,11 +588,17 @@ buzz.on("buttondown",function(event) {
 				// First player to push leaves the red light on
 				if(state.numberOfReplies == 1) {
 					allLights(false)
+					state.correct[event.controllerId] = true
 					state.lightState[event.controllerId] = true
 				}
 				
 				// Update status 
 				sendStatus()
+				
+				// All players have submitted their answer
+				if(state.numberOfReplies == state.numberOfPlayers) {
+					evaluateQuestion()
+				}
 			}
 			break
 			
