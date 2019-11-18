@@ -361,6 +361,20 @@ function setModus() {
 	}
 }
 
+// Get media information
+function getMediaInfo(string) {
+	const regExp = /\[(.*?)\]/g;
+	let matches = string.match(regExp)
+	let array = []
+	if(matches) {
+		for(let i = 0; i < matches.length; i++) {
+			array.push(matches[i].replace(/[\[\]']+/g, '').split(':'))
+		}
+	}
+	return array
+}
+
+
 // Refresh the dashboard page
 function refreshPage() {
 
@@ -400,6 +414,27 @@ function refreshPage() {
 	$("#solutionBuzzer").val(state.currentQuestion.solutionBuzzer)
 	$("#timer").val(state.currentQuestion.timer)
 	$("#remarks").val(state.currentQuestion.remarks);
+	let mediaArray = getMediaInfo(state.currentQuestion.remarks)
+	if(mediaArray[0] != null) {
+		console.log(mediaArray)
+		$("#mediaButtons").html('')
+		for(let i = 0; i < mediaArray.length; i++) {
+			$("#mediaButtons").append('<button id="media_' + i + '" type="button" value="' + mediaArray[i][1] + '">' + mediaArray[i][1] + '</button>')
+			if(mediaArray[i][0] == 'video') {
+				$("#media_" + i).click(function(){
+					var value = $(this).val()
+					socket.emit('video', value)
+				})
+			} else {
+				$("#media_" + i).click(function(){
+					var value = $(this).val()
+					socket.emit('img', value)
+				})				
+			}
+		}
+	} else {
+		$("#mediaButtons").html('')		
+	}
 
 	if(state.modus == "active") {
 		$("#addScores").hide()

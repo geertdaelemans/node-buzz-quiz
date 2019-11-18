@@ -2,6 +2,9 @@ var socket = io.connect('http://localhost:3000')
 
 var pageLoaded = false
 
+var videoPlaying = "none"
+var imageBackground = "none"
+
 // Question
 var question = {
 	id: 0,
@@ -37,15 +40,21 @@ var state = {
 	flashing: true
 }
 
+// Get the video
+var video = document.getElementById("backgroundVideo");
+
 const colorCode = ["blue", "orange", "green", "yellow"]
 
 $(function(){
-	socket.emit('getStatus')	
+	socket.emit('getStatus')
+	
+
 })
 
 // Initialize the scores page
 function setupPage() {
 	pageLoaded = true
+	$('#backgroundVideo').hide()
 	refreshPage()
 }
 
@@ -305,4 +314,42 @@ socket.on('status', function(msg) {
 	} else {
 		refreshPage()
 	}
+})
+
+// Receive background image
+socket.on('showImg', function(msg) {
+	let imageFile = "media/" + msg
+	if(imageBackground != imageFile) {	
+		$('body').css('background-image', 'url(' + imageFile + ')')
+		imageBackground = imageFile
+	} else {
+		$('body').css('background-image', 'url("")')
+		imageBackground = "none"
+	}
+	console.log(imageFile)
+})
+
+// Receive background video
+socket.on('showVideo', function(msg) {
+	let videoFile = "media/" + msg
+	console.log(videoFile)
+	if(videoPlaying != videoFile) {
+		$('#backgroundVideo').attr('src', videoFile)
+		$('#backgroundVideo').show()
+		$("#backgroundVideo")[0].load();
+		$("#backgroundVideo")[0].play();
+		videoPlaying = videoFile
+	} else {
+		$("#backgroundVideo")[0].pause()
+		$('#backgroundVideo').hide()
+		videoPlaying = "none"
+	}
+//	video.play()
+/*	$('backgroundVideo').on('ended', function(){
+		console.log("Video ended")
+    	$('#backgroundVideo').hide()    
+
+    });*/
+
+	console.log(msg)
 })

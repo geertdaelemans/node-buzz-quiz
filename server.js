@@ -252,6 +252,17 @@ io.on('connection', function(socket) {
 		state.title = ""
 		sendStatus()
 	})
+	
+	// Receive background image
+	socket.on('img', function(msg) {
+		io.emit('showImg', msg)
+	})
+
+	// Receive background video
+	socket.on('video', function(msg) {
+		io.emit('showVideo', msg)
+	})
+	
 })
 
 // Routes
