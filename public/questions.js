@@ -171,7 +171,15 @@ function refreshPage() {
 			activatePanel("waiting")
 			break
 		case "ready":
+			$('#questionRound').html("Ronde: " + state.currentQuestion.round)
+			$('#questionNumber').html("Vraag " + (parseInt(state.currentQuestion.id) + 1))			
 			$('#questionMode').html(getQuestionMode())
+			if(state.currentQuestion.questionMode == "multifirst" && state.currentQuestion.scoreArray[0] != 0) {
+				$('#questionPlus').html("Win: " + state.currentQuestion.scoreArray[0] + " &#8594; " + state.currentQuestion.scoreArray[state.currentQuestion.scoreArray.length - 1] + " punten")
+			} else {
+				$('#questionPlus').html("Win: " + state.currentQuestion.score + " punten")
+			}
+			$('#questionMinus').html("Verlies: " + state.currentQuestion.scoreMinus + " punten")
 			activatePanel("ready")
 			break
 		case "active":

@@ -20,7 +20,7 @@ body {
 	background-image: url('media/meetTheBeatlesh.jpg');
 	background-position: center; /* Center the image */
 	background-repeat: no-repeat;
-	background-size: auto 100%;
+	background-size: auto 1;
 }
 
 header {
@@ -50,6 +50,17 @@ img {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
+	grid-column-gap: 10px;
+	grid-row-gap: 10px;	
+}
+
+.stateContainer {
+	height: 100%;
+	padding: 15px;
+	margin: 0px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 6fr 1fr;
 	grid-column-gap: 10px;
 	grid-row-gap: 10px;	
 }
@@ -160,4 +171,34 @@ img {
 #myBtn:hover {
   background: #ddd;
   color: black;
+}
+
+.questionRound {
+	grid-column: 1 / 2;
+	justify-content: left;
+}
+
+.questionNumber {
+	grid-column: 2 / 2;	
+	justify-content: flex-end;
+}
+
+.questionMode {
+	font-size: 80px;
+	grid-column: 1 / 3;
+	grid-row: 2 / 3;
+}
+
+.questionPlus {
+	grid-column: 1 / 2;
+	justify-content: center;
+	background-color: green;
+	color: white;
+}
+
+.questionMinus {
+	grid-column: 2 / 2;
+	justify-content: center;
+	background-color: red;
+	color: white;
 }
