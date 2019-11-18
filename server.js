@@ -360,7 +360,7 @@ function startQuestion() {
 	if(state.currentQuestion.timer) {
 		clockCounter = state.currentQuestion.timer
 	} else {
-		clockCounter = 10
+		clockCounter = 20
 	}
 	clockActive = true
 	switch(state.questionMode) {
