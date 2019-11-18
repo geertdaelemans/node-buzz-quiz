@@ -4,11 +4,14 @@ var pageLoaded = false
 var flash = 0;
 
 var audio = []
-audio[0] = new Audio('./wav/alarm.wav');
-audio[1] = new Audio('./wav/crinkle.wav')
-audio[2] = new Audio('./wav/ding.wav')
-audio[3] = new Audio('./wav/flush.wav')
-audio[4] = new Audio('./wav/intro.wav')
+audio[0] = new Audio('./wav/buzz1.wav')
+audio[1] = new Audio('./wav/buzz2.wav')
+audio[2] = new Audio('./wav/buzz3.wav')
+audio[3] = new Audio('./wav/buzz4.wav')
+audio[4] = new Audio('./wav/buzz5.wav')
+audio[5] = new Audio('./wav/buzz6.wav')
+audio[6] = new Audio('./wav/buzz7.wav')
+audio[7] = new Audio('./wav/buzz8.wav')
 for(let i = 0; i < audio.length; i++) {
 	audio[i].autoplay = true
 }
