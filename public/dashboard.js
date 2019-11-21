@@ -35,7 +35,8 @@ var state = {
 	questionMode: "scoreboard",
 	modus: "waiting",
 	lightState: [],
-	flashing: true
+	flashing: true,
+	buzzerSounds: true
 }
 
 const colorCode = ["blue", "orange", "green", "yellow"]
@@ -69,6 +70,12 @@ $(function(){
 	// Change flashing mode
 	$("#flashing").change(function() {
         state.flashing = this.checked
+		socket.emit('updateStatus', state)
+    });
+	
+	// Change buzzer sounds mode
+	$("#buzzerSounds").change(function() {
+        state.buzzerSounds = this.checked
 		socket.emit('updateStatus', state)
     });
 	
@@ -389,6 +396,7 @@ function refreshPage() {
 	// Control panel
 	setModus()
 	$("#flashing").prop("checked", state.flashing)
+	$("#buzzerSounds").prop("checked", state.buzzerSounds)
 	
 	// Current question panel
 	$("input[id='id']").val(state.currentQuestion.id)

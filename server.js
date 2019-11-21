@@ -71,7 +71,8 @@ var state = {
 	modus: "waiting",
 	questionMode: "scoreboard",
 	lightState: [],
-	flashing: true
+	flashing: true,
+	buzzerSounds: true
 }
 
 // Load questions
@@ -473,7 +474,7 @@ buzz.on("buttondown",function(event) {
 		var playerName = `Buzz ${playerNumber}`
 		util.log(`${playerName} pushed ${event.button}`)
 		io.sockets.emit('new_message', {message : event.button, username : playerName, playerId : playerNumber})
-		if(event.button == "red") {
+		if(state.buzzerSounds) {
 			io.emit('sound', event.controllerId)
 		}
 		switch(state.questionMode) {

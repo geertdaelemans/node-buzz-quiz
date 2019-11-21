@@ -37,7 +37,8 @@ var state = {
 	title: "",
 	questionMode: "scoreboard",
 	lightState: [],
-	flashing: true
+	flashing: true,
+	buzzerSounds: true
 }
 
 // Get the video

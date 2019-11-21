@@ -50,7 +50,8 @@ var state = {
 	modus: "waiting",
 	questionMode: "scoreboard",
 	lightState: [],
-	flashing: true
+	flashing: true,
+	buzzerSounds: true
 }
 
 $(function(){
