@@ -200,3 +200,7 @@ p.message, p.question {
 .colorPicka:hover {
   background-color: yellow;
 }
+
+input[type="number"] {
+   width:40px;
+}
