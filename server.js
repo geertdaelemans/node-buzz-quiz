@@ -295,12 +295,18 @@ app.get('/questions', (req, res) => {
 // Initialize Buzz controllers
 const buzz = new Buzz({});
 state.numberOfPlayers = buzz.getNumberOfControllers();
-state.numberOfPlayers -= 1
 
 // Idle animation which turns on each LED in turn.
 var flashIndex = -1
 var flashCounter = -1
 var lightStateFlash = []
+
+if(state.numberOfPlayers == 0) {
+	util.log("Simulation mode started.")
+	state.numberOfPlayers = 8
+} else {
+	util.log("Ready! Press a button on any controller!")
+}
 
 for (i = 0; i < state.numberOfPlayers; i++) {
   lightStateFlash[i] = false
@@ -680,10 +686,3 @@ buzz.on("buttonup",function(event) {
 		sendStatus()
 	}
 })
-
-if(state.numberOfPlayers == 0) {
-	util.log("Simulation mode started.")
-	state.numberOfPlayers = 8
-} else {
-	util.log("Ready! Press a button on any controller!")
-}
