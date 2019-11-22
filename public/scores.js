@@ -48,7 +48,6 @@ var state = {
 	currentQuestion: question,
 	title: "",
 	modus: "waiting",
-	questionMode: "scoreboard",
 	lightState: [],
 	flashing: true,
 	buzzerSounds: true
@@ -430,12 +429,12 @@ function refreshPage() {
 			fillPlayerGrid("scoreboard")
 			break
 		case "ready":
-			setupPanels(state.questionMode)
-			fillPlayerGrid(state.questionMode)
+			setupPanels(state.currentQuestion.questionMode)
+			fillPlayerGrid(state.currentQuestion.questionMode)
 			break
 		default:
-			setupPanels(state.questionMode)
-			fillPlayerGrid(state.questionMode)
+			setupPanels(state.currentQuestion.questionMode)
+			fillPlayerGrid(state.currentQuestion.questionMode)
 	}
 }
 

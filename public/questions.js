@@ -35,7 +35,6 @@ var state = {
 	numberOfReplies: 0,
 	currentQuestion: question,
 	title: "",
-	questionMode: "scoreboard",
 	lightState: [],
 	flashing: true,
 	buzzerSounds: true
@@ -164,7 +163,7 @@ function stripImageTags(string) {
 // Refresh the questions page
 function refreshPage() {
 	let modus = state.modus
-	if(modus == "finished" && state.questionMode == "multisteal") {
+	if(modus == "finished" && state.currentQuestion.questionMode == "multisteal") {
 		modus = "results"
 	}
 	switch(modus) {
@@ -191,7 +190,7 @@ function refreshPage() {
 			break
 		case "active":
 		case "finished":
-			if(state.questionMode == "buzzer") {
+			if(state.currentQuestion.questionMode == "buzzer") {
 				activatePanel("open")
 				
 				// Question
@@ -267,7 +266,7 @@ function refreshPage() {
 			}
 			break
 		case "results":
-			switch(state.questionMode) {
+			switch(state.currentQuestion.questionMode) {
 				case "multiple":
 				case "multifirst":
 				case "multisteal":

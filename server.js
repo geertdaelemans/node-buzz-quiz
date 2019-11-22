@@ -69,7 +69,6 @@ var state = {
 	currentQuestion: question,
 	title: "",
 	modus: "waiting",
-	questionMode: "scoreboard",
 	lightState: [],
 	flashing: true,
 	buzzerSounds: true
@@ -178,9 +177,9 @@ io.on('connection', function(socket) {
 	
 	// Finished state received
 	socket.on("results", function() {
-		if(state.questionMode == "buzzer") {
+		if(state.currentQuestion.questionMode == "buzzer") {
 			calculateBuzzer()
-		} else if (state.questionMode == "multisteal") {
+		} else if (state.currentQuestion.questionMode == "multisteal") {
 			if(state.correct.includes(true)) {
 				stealScores()
 			}
@@ -382,7 +381,7 @@ function startQuestion() {
 		clockCounter = 20
 	}
 	clockActive = true
-	switch(state.questionMode) {
+	switch(state.currentQuestion.questionMode) {
 		case "multiple":
 		case "multifirst":
 		case "multisteal":
@@ -405,7 +404,7 @@ function evaluateQuestion() {
 		allLights(false)
 		state.flashing = false
 	}
-	switch(state.questionMode) {
+	switch(state.currentQuestion.questionMode) {
 		case "multiple":
 		case "multifirst":
 		case "multisteal":
@@ -483,7 +482,7 @@ buzz.on("buttondown",function(event) {
 		if(state.buzzerSounds) {
 			io.emit('sound', event.controllerId)
 		}
-		switch(state.questionMode) {
+		switch(state.currentQuestion.questionMode) {
 			
 			// Simple multiple choice questions (no limits)
 			case "multiple":
@@ -533,7 +532,7 @@ buzz.on("buttondown",function(event) {
 					state.numberOfReplies++
 					state.speedSequence[event.controllerId] = state.numberOfReplies
 					
-					if(state.currentQuestion.scoreArray[0] != null && state.questionMode != "multisteal") {
+					if(state.currentQuestion.scoreArray[0] != null && state.currentQuestion.questionMode != "multisteal") {
 						// All players can submit a correct question
 						if(event.button == colorCode[state.currentQuestion.solution]) {
 							state.correct[event.controllerId] = true
@@ -561,7 +560,7 @@ buzz.on("buttondown",function(event) {
 						// One player has submitted a correct answer and all stops
 						if(event.button == colorCode[state.currentQuestion.solution]) {
 							state.correct[event.controllerId] = true
-							if(state.questionMode != "multisteal") {
+							if(state.currentQuestion.questionMode != "multisteal") {
 								state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
 							}
 							evaluateQuestion()
@@ -674,7 +673,7 @@ buzz.on("buttondown",function(event) {
 // Button released, just for switching off the LED's
 buzz.on("buttonup",function(event) {
 	if(event.controllerId < state.numberOfPlayers) {
-		switch(state.questionMode) {
+		switch(state.currentQuestion.questionMode) {
 			case "multiple":
 			case "buzzer":
 			case "inorder":

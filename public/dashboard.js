@@ -32,7 +32,6 @@ var state = {
 	numberOfReplies: 0,
 	currentQuestion: question,
 	title: "",
-	questionMode: "scoreboard",
 	modus: "waiting",
 	lightState: [],
 	flashing: true,
@@ -98,7 +97,6 @@ $(function(){
 	$("#buttonReady").click(function() {
 		updateCurrentQuestion()
 		state.title = $("#title").val()
-		state.questionMode = $("#questionmode").val()
 		state.flashing = true
 		state.modus = "ready"
 		socket.emit('updateStatus', state)
@@ -109,7 +107,6 @@ $(function(){
 	$("#buttonActive").click(function() {
 		updateCurrentQuestion()
 		state.title = $("#title").val()
-		state.questionMode = $("#questionmode").val()
 		state.modus = "active"
 		socket.emit('updateStatus', state)
 		socket.emit('active')
