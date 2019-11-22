@@ -190,9 +190,23 @@ function updateCurrentQuestion() {
 
 // Initialize the dashboard page
 function setupPage() {
+	
+	// Change the number of players
 	$("#numberPlayers").change(function(){
 		let number = $(this).val()
 		socket.emit('numberPlayers', number)
+	})
+	
+	// Open the questions panel in a new windows
+	$("#openQuestionsPanel").click(function() {
+		var win = window.open('questions', '_blank');
+		win.focus();		
+	})
+	
+	// Open the scores panel in a new window
+	$("#openScoresPanel").click(function() {
+		var win = window.open('scores', '_blank');
+		win.focus();
 	})
 	
 	$('#questionmode').change(function() {
