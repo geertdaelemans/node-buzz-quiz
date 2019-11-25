@@ -41,6 +41,7 @@ var state = {
 const colorCode = ["blue", "orange", "green", "yellow"]
 
 var questionsList = []
+var rounds = []
 
 $(function(){
 	socket.emit('getStatus')
@@ -191,6 +192,9 @@ function updateCurrentQuestion() {
 // Initialize the dashboard page
 function setupPage() {
 	
+	// Get names of all rounds in array
+	socket.emit('getAllRounds')
+	
 	// Change the number of players
 	$("#numberPlayers").change(function(){
 		let number = $(this).val()
@@ -271,6 +275,12 @@ function setupPage() {
 			socket.emit('light', {number : value})
 		})
 	}
+	
+	$('#rounds').change(function(){
+		let round = $(this).val()
+		refreshQuestions(questionsList, round)
+	})
+	
 	socket.emit('getQuestions')
 	pageLoaded = true
 	refreshPage()
@@ -507,6 +517,34 @@ function refreshPage() {
 	$("#moveTo").prop("disabled", state.modus == "active")
 }
 
+function refreshQuestions(questions, round = "none") {
+	let id = state.currentQuestion.id
+	questionsList = questions
+	$('#questions').html('')
+	for(let i = 0; i < questions.length; i++) {
+		question = questions[i]
+		if(question.round == round || round == "none") {
+			if($('#question_' + i).length) {
+				$('#question_' + i).html((i + 1) + ' - ' + question.question)
+			} else {
+				$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.question + '</p>')
+				$('#question_' + i ).click(function() {
+					if(state.modus == "waiting") {  // Avoid scrolling through questions while question is active
+						let name = $(this).attr('name')
+						selectQuestion(name)
+						state.currentQuestion = questionsList[name]
+						socket.emit('updateStatus', state)
+					}
+				})
+			}
+		} else {
+			$('#question_' + i).remove()
+		}
+	}
+	state.currentQuestion = questions[id]
+	socket.emit('updateStatus', state)
+}
+
 socket.on('status', function(msg) {
 	console.log(msg)
 	state = msg
@@ -524,25 +562,11 @@ socket.on("new_message", function(data) {
 })
 
 socket.on('questions', function(questions) {
-	let id = state.currentQuestion.id
-	questionsList = questions
-	for(let i = 0; i < questions.length; i++) {
-		question = questions[i]
-		if($('#question_' + i).length) {
-			$('#question_' + i).html((i + 1) + ' - ' + question.question)
-		} else {
-			$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.question + '</p>')
-			$('#question_' + i ).click(function() {
-				if(state.modus == "waiting") {  // Avoid scrolling through questions while question is active
-					let name = $(this).attr('name')
-					selectQuestion(name)
-					state.currentQuestion = questionsList[name]
-					socket.emit('updateStatus', state)
-				}
-			})
-		}
+	refreshQuestions(questions)
+})
+
+socket.on('rounds', function(rounds) {
+	for(let i = 0; i < rounds.length; i++) {
+		$('#rounds').append('<option value="' + rounds[i] + '">' + rounds[i] + '</option>')
 	}
-	state.currentQuestion = questions[id]
-	socket.emit('updateStatus', state)
-	console.log("length", questionsList.length)
 })

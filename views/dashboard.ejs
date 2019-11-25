@@ -16,12 +16,14 @@
 	
 	<section id="control" class="control">
 	  <label>Control flow:</label>
-	  <button id="buttonWaiting" type="button">Waiting</button> >>
-	  <button id="buttonReady" type="button">Ready</button> >> 
-	  <button id="buttonActive" type="button">Active</button> >>
-	  <button id="buttonFinished" type="button">Finished</button> >>
-	  <button id="buttonResults" type="button">Results</button><br/>
-	  <button id="addScores" type="button">Add Scores</button>
+	  <div class="controlFlow">
+		<button id="buttonWaiting" type="button">Waiting</button> >>
+		<button id="buttonReady" type="button">Ready</button> >> 
+		<button id="buttonActive" type="button">Active</button> >>
+		<button id="buttonFinished" type="button">Finished</button> >>
+		<button id="buttonResults" type="button">Results</button><br/>
+		<button id="addScores" type="button">Add Scores</button>
+	  </div>
 	  <fieldset>
 	    <legend>Current Question</legend>
 		<input type="hidden" id="id" value="0" />
@@ -125,6 +127,11 @@
 	
 	<label for="moveTo">Move selected question to: </label>
 	<input type="number" id="moveTo" />
+	<label for="rounds">Filter rounds: </label>
+	<select id="rounds">
+		<option value="none">None</option>
+	</select>
+	
 
 	<section id="questions">
 	</section>

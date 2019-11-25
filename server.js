@@ -276,6 +276,11 @@ io.on('connection', function(socket) {
 		state.numberOfPlayers = msg
 	})
 	
+	// Send list of rounds
+	socket.on('getAllRounds', function() {
+		io.emit('rounds', getAllRounds())
+	})
+	
 })
 
 // Routes
@@ -470,6 +475,17 @@ function allLights(onOff) {
 	for (i = 0; i < state.numberOfPlayers; i++) {
 		state.lightState[i] = onOff
 	}
+}
+
+// Get all rounds
+function getAllRounds() {
+	let allRounds = []
+	for(let i = 0; i < questions.length; i++) {
+		if(!allRounds.includes(questions[i].round)) {
+			allRounds.push(questions[i].round)
+		}
+	}
+	return allRounds
 }
 
 // Light controllers with a button pressed down
