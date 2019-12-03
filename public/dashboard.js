@@ -156,6 +156,10 @@ $(function(){
 		socket.emit('moveTo', (parseInt($('#moveTo').val()) - 1))
 	})
 	
+	$('#delete').click(function() {
+		socket.emit('delete', parseInt(state.currentQuestion.id))
+	})
+	
 	// Next question
 	$("#nextQuestion").click(function() {
 		socket.emit('nextQuestion')

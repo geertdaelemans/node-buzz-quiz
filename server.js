@@ -281,6 +281,11 @@ io.on('connection', function(socket) {
 		io.emit('rounds', getAllRounds())
 	})
 	
+	// Delete question
+	socket.on('delete', function(msg) {
+		deleteQuestion(msg)
+	})
+	
 })
 
 // Routes
@@ -486,6 +491,22 @@ function getAllRounds() {
 		}
 	}
 	return allRounds
+}
+
+// Delete question
+function deleteQuestion(msg) {
+	if (msg >= 0 && msg < questions.length) {
+		questions.splice(parseInt(msg), 1)
+		// Renumber the questions
+		for(let i = 0; i < questions.length; i++) {
+			questions[i].id = i
+		}
+		storeData(questions, "questions.txt")
+		state.currentQuestion = questions[parseInt(msg)]
+		sendStatus()
+		io.emit('questions', questions)
+		util.log(`Deleted question ${msg + 1}.`)		
+	}
 }
 
 // Light controllers with a button pressed down
