@@ -201,7 +201,7 @@ function refreshPage() {
 				}
 				let imageName = getImageInfo(state.currentQuestion.question)
 				if(imageName) {
-					$("#questionSingle").append('<img src="' + imageName + '" />')
+					$("#questionSingle").append('<div><img src="' + imageName + '" /></div>')
 				}
 			} else {
 				activatePanel("multiple")

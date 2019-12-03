@@ -171,6 +171,11 @@ $(function(){
 	})
 });
 
+// Strip special tags from data fields
+function stripImageTags(string) {
+	return string.replace(/ *\[[^)]*\] */g, "")
+}
+
 // Update current Question in memory
 function updateCurrentQuestion() {
 	state.currentQuestion.round = $("#round").val()
@@ -531,7 +536,7 @@ function refreshQuestions(questions, round = "none") {
 			if($('#question_' + i).length) {
 				$('#question_' + i).html((i + 1) + ' - ' + question.question)
 			} else {
-				$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.question + '</p>')
+				$('#questions').append('<p id="question_' + i + '" class="question" name="' + i + '">' + (i + 1) + ' - ' + question.round + ' - ' + stripImageTags(question.question) + '</p>')
 				$('#question_' + i ).click(function() {
 					if(state.modus == "waiting") {  // Avoid scrolling through questions while question is active
 						let name = $(this).attr('name')
