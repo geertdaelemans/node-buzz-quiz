@@ -545,6 +545,7 @@ function refreshQuestions(questions, round = "none") {
 			$('#question_' + i).remove()
 		}
 	}
+	$('#moveTo').attr('max', questions.length)
 	state.currentQuestion = questions[id]
 	socket.emit('updateStatus', state)
 }

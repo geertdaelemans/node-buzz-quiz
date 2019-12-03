@@ -350,6 +350,7 @@ socket.on('showVideo', function(msg) {
 		$('#backgroundVideo').show()
 		$("#backgroundVideo")[0].load();
 		$("#backgroundVideo")[0].play();
+		$("video").prop('muted', false);		
 		videoPlaying = videoFile
 	} else {
 		$("#backgroundVideo")[0].pause()
@@ -372,6 +373,7 @@ socket.on('showAudio', function(msg) {
 		$('#backgroundVideo').hide()
 		$("#backgroundVideo")[0].load();
 		$("#backgroundVideo")[0].play();
+		$("video").prop('muted', false);
 		videoPlaying = videoFile
 	} else {
 		$("#backgroundVideo")[0].pause()
