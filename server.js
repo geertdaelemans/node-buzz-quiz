@@ -494,15 +494,22 @@ function getAllRounds() {
 }
 
 // Delete question
-function deleteQuestion(msg) {
-	if (msg >= 0 && msg < questions.length) {
-		questions.splice(parseInt(msg), 1)
+function deleteQuestion(index) {
+	if (index >= 0 && index < questions.length) {
+		// Delete question
+		questions.splice(index, 1)
 		// Renumber the questions
 		for(let i = 0; i < questions.length; i++) {
 			questions[i].id = i
 		}
+		// Save questions list
 		storeData(questions, "questions.txt")
-		state.currentQuestion = questions[parseInt(msg)]
+		// Load current question
+		if(msg < questions.length) {
+			state.currentQuestion = questions[msg]
+		} else {
+			state.currentQuestion = questions[questions.length - 1]
+		}
 		sendStatus()
 		io.emit('questions', questions)
 		util.log(`Deleted question ${msg + 1}.`)		
@@ -514,7 +521,7 @@ buzz.on("buttondown",function(event) {
 	if(event.controllerId < state.numberOfPlayers) {
 		var playerNumber = parseInt(event.controllerId) + 1
 		var playerName = `Buzz ${playerNumber}`
-		util.log(`${playerName} pushed ${event.button}`)
+		util.log(`${playerName} pushed ${event.button}.`)
 		io.sockets.emit('new_message', {message : event.button, username : playerName, playerId : playerNumber})
 		if(state.buzzerSounds) {
 			io.emit('sound', event.controllerId)
