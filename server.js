@@ -1,42 +1,42 @@
-const express = require('express')
-const app = express()
-const util = require('util')
-const Buzz = require("./buzz/buzzers.js")
-const fs = require('fs')
+const express = require('express');
+const app = express();
+const util = require('util');
+const Buzz = require("./buzz/buzzers.js");
+const fs = require('fs');
 
 var audioFiles = fs.readdirSync('./public/wav/');
 
 const storeData = (data, path) => {
   try {
-    fs.writeFileSync(path, JSON.stringify(data))
+    fs.writeFileSync(path, JSON.stringify(data));
   } catch (err) {
-    util.log("Error: ", err)
+    util.log("Error: ", err);
   }
 }
 
 const loadData = (path) => {
   try {
-    return JSON.parse(fs.readFileSync(path, 'utf8'))
+    return JSON.parse(fs.readFileSync(path, 'utf8'));
   } catch (err) {
-    util.log(`Error: not able to load ${path}.`)
-    return false
+    util.log(`Error: not able to load ${path}.`);
+    return false;
   }
 }
 
 // Set the template engine ejs
-app.set('view engine', 'ejs')
+app.set('view engine', 'ejs');
 
 // Middleware
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 // Listen on port 3000
-server = app.listen(3000)
+server = app.listen(3000);
 
 // Socket.io instantiation
-const io = require("socket.io")(server)
+const io = require("socket.io")(server);
 
 // Color Code Buzzers
-const colorCode = ["blue", "orange", "green", "yellow"]
+const COLORCODE = ["blue", "orange", "green", "yellow"];
 
 // Question
 var question = {
@@ -75,271 +75,272 @@ var state = {
 }
 
 // Load questions
-var questions = loadData("questions.txt")
+var questions = loadData("questions.txt");
 if(!questions) {
-	questions = loadData("sample.txt")
-	storeData(questions, "questions.txt")
-	util.log(`Loading sample file.`)
+	questions = loadData("sample.txt");
+	storeData(questions, "questions.txt");
+	util.log(`Loading sample file.`);
 }
-util.log(questions.length + ' questions loaded.')
+util.log(questions.length + ' questions loaded.');
 
 // Sending flashing inforation to client
-var emitLight = false
-var flash = 0
+var emitLight = false;
+var flash = 0;
 
 // Winner index
-var winnerIndex = 0
+var winnerIndex = 0;
 
 // Clock counter
-var clockCounter = 0
-var clockActive = false
+var clockCounter = 0;
+var clockActive = false;
 
 // Listen on every connection
 io.on('connection', function(socket) {
-	util.log(`User connected: ${socket.id}.`)
+	util.log(`User connected: ${socket.id}.`);
 	
 	// Default username
-	socket.username = "Anonymous"
+	socket.username = "Anonymous";
 	
 	// Client asks for general status
 	socket.on('getStatus', function() {
-		sendStatus(socket.id)
-	})
+		sendStatus(socket.id);
+	});
 	
 	// Get lightState
 	socket.on('light', (data) => {
 		if (state.lightState[data.number]) {
-			state.lightState[data.number] = false
-			util.log("Buzzer ", data.number, " switched off.")
+			state.lightState[data.number] = false;
+			util.log("Buzzer ", data.number, " switched off.");
 		} else {
-			state.lightState[data.number] = true
-			util.log("Buzzer ", data.number, " switched on.")
+			state.lightState[data.number] = true;
+			util.log("Buzzer ", data.number, " switched on.");
 		}
-		sendStatus()
-	})	
+		sendStatus();
+	});
 	
 	// Listen on change_username
 	socket.on('change_username', (data) => {
-		socket.username = data.username
-		util.log("Username changed: ", socket.username)
-	})
+		socket.username = data.username;
+		util.log("Username changed: ", socket.username);
+	});
 	
     // Listen on new_message
     socket.on('new_message', (data) => {
         //broadcast the new message
         io.sockets.emit('new_message', {message : data.message, username : socket.username});
-    })
+    });
 	
 	// Listen on add scores
     socket.on('addScores', (data) => {
-		resetQuestion()
-        sendStatus()
-    })
+		resetQuestion();
+        sendStatus();
+    });
 	
 	// Listen on statusUpdate
 	socket.on('updateStatus', function(value) {
-		state = value
-		sendStatus()
+		state = value;
+		sendStatus();
 	});	
 	
 	// Name update
 	socket.on("name",function(msg) {
-		state.names[msg.player] = msg.value
-		sendStatus()
-	})
+		state.names[msg.player] = msg.value;
+		sendStatus();
+	});
 	
 	// Start question received
 	socket.on("start", function(msg) {
 		if(state.modus == "ready") {
-			resetQuestion()
+			resetQuestion();
 		} else if(state.modus == "active") {
-			evaluateQuestion()
+			evaluateQuestion();
 		} else {
-			startQuestion()
+			startQuestion();
 		}
-	})
+	});
 	
 	// Ready state received
 	socket.on("ready", function() {
-		resetQuestion()
-		sendStatus()
-	})
+		resetQuestion();
+		sendStatus();
+	});
 	
 	// Active state received
 	socket.on("active", function() {
-		startQuestion()
-	})
+		startQuestion();
+	});
 	
 	// Finished state received
 	socket.on("finished", function() {
-		evaluateQuestion()
-	})
+		evaluateQuestion();
+	});
 	
 	// Finished state received
 	socket.on("results", function() {
 		if(state.currentQuestion.questionMode == "buzzer") {
-			calculateBuzzer()
+			calculateBuzzer();
 		} else if (state.currentQuestion.questionMode == "multisteal") {
 			if(state.correct.includes(true)) {
-				stealScores()
+				stealScores();
 			}
 		} else {
-			state.flashing = false
+			state.flashing = false;
 		}
-	})
+	});
 	
 	// Request questions
 	socket.on("getQuestions", function() {
-		io.to(socket.id).emit('questions', questions)
-	})
+		io.to(socket.id).emit('questions', questions);
+	});
 	
 	// Update question
 	socket.on("updateQuestion", function() {
-		questions[state.currentQuestion.id] = state.currentQuestion
-		storeData(questions, "questions.txt")
-		io.emit('questions', questions)
-		util.log("Updated question " + (state.currentQuestion.id + 1) + ".")
-	})
+		questions[state.currentQuestion.id] = state.currentQuestion;
+		storeData(questions, "questions.txt");
+		io.emit('questions', questions);
+		util.log("Updated question " + (state.currentQuestion.id + 1) + ".");
+	});
 	
 	// Add a new question
 	socket.on("newQuestion", function() {
-		state.currentQuestion.id = questions.length
-		questions.push(state.currentQuestion)
-		storeData(questions, "questions.txt")
-		io.emit('questions', questions)
-		util.log("Added new question.")
-	})
+		state.currentQuestion.id = questions.length;
+		questions.push(state.currentQuestion);
+		storeData(questions, "questions.txt");
+		io.emit('questions', questions);
+		util.log("Added new question.");
+	});
 
 	// Move question to position
 	socket.on("moveTo", function(msg) {
 		if (msg >= 0 && msg < questions.length) {
-			util.log("Moved question", (state.currentQuestion.id + 1), "to position", (msg + 1), ".")
-			questions.splice(state.currentQuestion.id, 1)
-			questions.splice(msg, 0, state.currentQuestion)
-			let index = 0
+			util.log("Moved question", (state.currentQuestion.id + 1), "to position", (msg + 1), ".");
+			questions.splice(state.currentQuestion.id, 1);
+			questions.splice(msg, 0, state.currentQuestion);
+			let index = 0;
 			// Renumber the questions
 			for(let i = 0; i < questions.length; i++) {
-				questions[i].id = i
+				questions[i].id = i;
 			}
-			storeData(questions, "questions.txt")
-			state.currentQuestion.id = msg
-			sendStatus()
-			io.emit('questions', questions)
+			storeData(questions, "questions.txt");
+			state.currentQuestion.id = msg;
+			sendStatus();
+			io.emit('questions', questions);
 		}
-	})
+	});
 
 	// Send current list of available audio files
 	socket.on("getAudioFiles", function() {
-		io.emit('audioFiles', audioFiles)
-	})
+		io.emit('audioFiles', audioFiles);
+	});
 
 	// Next question
 	socket.on("nextQuestion", function() {
-		let index = 0
+		let index = 0;
 		if(state.currentQuestion.id < questions.length - 1) {
-			index = state.currentQuestion.id + 1
+			index = state.currentQuestion.id + 1;
 		}
-		state.currentQuestion = questions[index]
-		state.title = ""
-		sendStatus()
-	})
+		state.currentQuestion = questions[index];
+		state.title = "";
+		sendStatus();
+	});
 	
 	// Previous question
 	socket.on("previousQuestion", function() {
-		let index = questions.length - 1
+		let index = questions.length - 1;
 		if(state.currentQuestion.id > 0) {
-			index = state.currentQuestion.id - 1
+			index = state.currentQuestion.id - 1;
 		}
-		state.currentQuestion = questions[index]
-		state.title = ""
-		sendStatus()
-	})
+		state.currentQuestion = questions[index];
+		state.title = "";
+		sendStatus();
+	});
 	
 	// Receive background image
 	socket.on('img', function(msg) {
-		io.emit('showImg', msg)
-	})
+		io.emit('showImg', msg);
+	});
 
 	// Receive background video
 	socket.on('video', function(msg) {
-		io.emit('showVideo', msg)
-	})
+		io.emit('showVideo', msg);
+	});
 	
 	// Receive background audio
 	socket.on('audio', function(msg) {
-		io.emit('showAudio', msg)
-	})
+		io.emit('showAudio', msg);
+	});
 	
 	// Reveive changed number of players
 	socket.on('numberPlayers', function(msg) {
-		util.log('Changed number of players to', msg)
-		state.numberOfPlayers = msg
-	})
+		util.log('Changed number of players to', msg);
+		state.numberOfPlayers = msg;
+	});
 	
 	// Send list of rounds
 	socket.on('getAllRounds', function() {
-		io.emit('rounds', getAllRounds())
-	})
+		io.emit('rounds', getAllRounds());
+	});
 	
 	// Delete question
 	socket.on('delete', function(msg) {
-		deleteQuestion(msg)
-	})
+		deleteQuestion(msg);
+	});
 	
-})
+});
 
 // Routes
 app.get('/', (req, res) => {
-	res.render('dashboard')
-})
+	res.render('dashboard');
+});
 
 app.get('/scores', (req, res) => {
-	res.render('scores')
-})
+	res.render('scores');
+});
 
 app.get('/questions', (req, res) => {
-	res.render('questions')
-})
+	res.render('questions');
+});
 
 // Initialize Buzz controllers
 const buzz = new Buzz({});
 state.numberOfPlayers = buzz.getNumberOfControllers();
 
 // Idle animation which turns on each LED in turn.
-var flashIndex = -1
-var flashCounter = -1
-var lightStateFlash = []
+var flashIndex = -1;
+var flashCounter = -1;
+var lightStateFlash = [];
 
 if(state.numberOfPlayers == 0) {
-	util.log("Simulation mode started.")
-	state.numberOfPlayers = 8
+	util.log("Simulation mode started.");
+	state.numberOfPlayers = 8;
 } else {
-	util.log("Ready! Press a button on any controller!")
+	util.log("Ready! Press a button on any controller!");
 }
 
 for (i = 0; i < state.numberOfPlayers; i++) {
-  lightStateFlash[i] = false
-  state.lightState[i] = false
-  state.scores[i] = 0
-  state.scoresDelta[i] = 0
-  state.correct[i] = false
-  state.names[i] = "Ploeg " + parseInt(i+1)
-  state.selectedButtons[i] = "none"
-  state.speedSequence[i] = 0
+  lightStateFlash[i] = false;
+  state.lightState[i] = false;
+  state.scores[i] = 0;
+  state.scoresDelta[i] = 0;
+  state.correct[i] = false;
+  state.names[i] = "Ploeg " + parseInt(i+1);
+  state.selectedButtons[i] = "none";
+  state.speedSequence[i] = 0;
 }
 
 setInterval(function() {
-	var ls = []
+	var ls = [];
 	for (i = 0; i < state.numberOfPlayers; i++) {
 		ls[i] = false;
 	}
-	for (var i in state.lightState)
-		ls[i] = lightStateFlash[i] || state.lightState[i]
-    buzz.light(ls)
-},10)
+	for (var i in state.lightState) {
+		ls[i] = lightStateFlash[i] || state.lightState[i];
+	}
+    buzz.light(ls);
+},10);
 
 setInterval(function() {
-	flashCounter++
+	flashCounter++;
 	if (state.flashing) {
 		if(!(flashCounter % 2)) {
 			flashIndex++;
@@ -348,8 +349,8 @@ setInterval(function() {
 			}
 			lightStateFlash[flashIndex % state.numberOfPlayers] = true
 			if(emitLight) {
-				flash = flashIndex % state.numberOfPlayers
-				io.emit('flash', flash)
+				flash = flashIndex % state.numberOfPlayers;
+				io.emit('flash', flash);
 			}
 		}
 	} else {
@@ -357,20 +358,20 @@ setInterval(function() {
 			lightStateFlash[i] = false;
 		}		
 	}
-}, 100)
+}, 100);
 
 setInterval(function() {
 	if(clockActive) {
-		io.emit('clock', clockCounter)
+		io.emit('clock', clockCounter);
 		if(clockCounter > 0) {		
-			clockCounter--
+			clockCounter--;
 		} else {
-			clockActive = false
-			state.modus = "finished"
-			evaluateQuestion()
+			clockActive = false;
+			state.modus = "finished";
+			evaluateQuestion();
 		}
 	}
-}, 1000)
+}, 1000);
 
 
 // Send status to client(s)
@@ -386,11 +387,11 @@ function sendStatus(clientID) {
 // Start question
 function startQuestion() {
 	if(state.currentQuestion.timer) {
-		clockCounter = state.currentQuestion.timer
+		clockCounter = state.currentQuestion.timer;
 	} else {
-		clockCounter = 20
+		clockCounter = 20;
 	}
-	clockActive = true
+	clockActive = true;
 	switch(state.currentQuestion.questionMode) {
 		case "multiple":
 		case "multifirst":
@@ -403,16 +404,16 @@ function startQuestion() {
 			break;
 		default:
 	}
-	sendStatus()
+	sendStatus();
 }
 
 // Evaluate question
 function evaluateQuestion() {
-	state.modus = "finished"
-	clockActive = false
+	state.modus = "finished";
+	clockActive = false;
 	if(state.modus != "buzzer") {
-		allLights(false)
-		state.flashing = false
+		allLights(false);
+		state.flashing = false;
 	}
 	switch(state.currentQuestion.questionMode) {
 		case "multiple":
@@ -428,103 +429,103 @@ function evaluateQuestion() {
 			break
 		default:
 	}
-	sendStatus()
+	sendStatus();
 }
 
 // Calculate buzzer points
 function calculateBuzzer() {
 	for(let i = 1; i <= state.numberOfPlayers; i++) {
-		let playerIndex = state.speedSequence.indexOf(i)
+		let playerIndex = state.speedSequence.indexOf(i);
 		if(playerIndex != -1) {
 			if(state.correct[playerIndex]) {
-				state.scoresDelta[playerIndex] = parseInt(state.currentQuestion.score)
-				break
+				state.scoresDelta[playerIndex] = parseInt(state.currentQuestion.score);
+				break;
 			} else {
 				if(state.currentQuestion.scoreMinus) {
-					state.scoresDelta[playerIndex] = -parseInt(state.currentQuestion.scoreMinus)
+					state.scoresDelta[playerIndex] = -parseInt(state.currentQuestion.scoreMinus);
 				}
 			}
 		} else {
-			break
+			break;
 		}
 	}
-	sendStatus()
+	sendStatus();
 }
 
 // Steal scores
 function stealScores() {
-	winnerIndex = state.correct.indexOf(true)
-	allLights(false)
-	state.flashing = true
-	state.lightState[winnerIndex] = true
-	emitLight = true
+	winnerIndex = state.correct.indexOf(true);
+	allLights(false);
+	state.flashing = true;
+	state.lightState[winnerIndex] = true;
+	emitLight = true;
 }
 
 // Reset question
 function resetQuestion() {
 	for (i = 0; i < state.numberOfPlayers; i++) {
-		state.scores[i] += parseInt(state.scoresDelta[i])
-		state.scoresDelta[i] = 0
-		state.correct[i] = false
-		state.selectedButtons[i] = "none"
-		state.speedSequence[i] = 0
+		state.scores[i] += parseInt(state.scoresDelta[i]);
+		state.scoresDelta[i] = 0;
+		state.correct[i] = false;
+		state.selectedButtons[i] = "none";
+		state.speedSequence[i] = 0;
 	}
-	state.numberOfReplies = 0
-	allLights(false)
+	state.numberOfReplies = 0;
+	allLights(false);
 	
-	storeData(state, "latestStatus.txt")
+	storeData(state, "latestStatus.txt");
 }
 
 // All lights on
 function allLights(onOff) {
 	for (i = 0; i < state.numberOfPlayers; i++) {
-		state.lightState[i] = onOff
+		state.lightState[i] = onOff;
 	}
 }
 
 // Get all rounds
 function getAllRounds() {
-	let allRounds = []
+	let allRounds = [];
 	for(let i = 0; i < questions.length; i++) {
 		if(!allRounds.includes(questions[i].round)) {
-			allRounds.push(questions[i].round)
+			allRounds.push(questions[i].round);
 		}
 	}
-	return allRounds
+	return allRounds;
 }
 
 // Delete question
 function deleteQuestion(index) {
 	if (index >= 0 && index < questions.length) {
 		// Delete question
-		questions.splice(index, 1)
+		questions.splice(index, 1);
 		// Renumber the questions
 		for(let i = 0; i < questions.length; i++) {
-			questions[i].id = i
+			questions[i].id = i;
 		}
 		// Save questions list
-		storeData(questions, "questions.txt")
+		storeData(questions, "questions.txt");
 		// Load current question
 		if(index < questions.length) {
-			state.currentQuestion = questions[index]
+			state.currentQuestion = questions[index];
 		} else {
-			state.currentQuestion = questions[questions.length - 1]
+			state.currentQuestion = questions[questions.length - 1];
 		}
-		sendStatus()
-		io.emit('questions', questions)
-		util.log(`Deleted question ${index + 1}.`)		
+		sendStatus();
+		io.emit('questions', questions);
+		util.log(`Deleted question ${index + 1}.`);	
 	}
 }
 
 // Light controllers with a button pressed down
 buzz.on("buttondown",function(event) {
 	if(event.controllerId < state.numberOfPlayers) {
-		var playerNumber = parseInt(event.controllerId) + 1
-		var playerName = `Buzz ${playerNumber}`
-		util.log(`${playerName} pushed ${event.button}.`)
-		io.sockets.emit('new_message', {message : event.button, username : playerName, playerId : playerNumber})
+		var playerNumber = parseInt(event.controllerId) + 1;
+		var playerName = `Buzz ${playerNumber}`;
+		util.log(`${playerName} pushed ${event.button}.`);
+		io.sockets.emit('new_message', {message : event.button, username : playerName, playerId : playerNumber});
 		if(state.buzzerSounds) {
-			io.emit('sound', event.controllerId)
+			io.emit('sound', event.controllerId);
 		}
 		switch(state.currentQuestion.questionMode) {
 			
@@ -536,32 +537,32 @@ buzz.on("buttondown",function(event) {
 				   event.button != "red") {
 					   
 					// Register pushed button
-					state.selectedButtons[event.controllerId] = event.button
-					state.numberOfReplies++
+					state.selectedButtons[event.controllerId] = event.button;
+					state.numberOfReplies++;
 					
 					// Player has submitted answer, which is instantly evaluated
-					if(event.button == colorCode[state.currentQuestion.solution]) {
-						state.correct[event.controllerId] = true
-						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+					if(event.button == COLORCODE[state.currentQuestion.solution]) {
+						state.correct[event.controllerId] = true;
+						state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score);
 					} else {
-						state.correct[event.controllerId] = false
+						state.correct[event.controllerId] = false;
 						if(state.currentQuestion.scoreMinus) {
-							state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+							state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus);
 						}
 					}
 					
 					// Turn red light off
-					state.lightState[event.controllerId] = false
+					state.lightState[event.controllerId] = false;
 					
 					// Update status 
-					sendStatus()
+					sendStatus();
 					
 					// All players have submitted their answer
 					if(state.numberOfReplies == state.numberOfPlayers) {
-						evaluateQuestion()
+						evaluateQuestion();
 					}
 				}
-				break
+				break;
 			
 			// Multiple choice, only fastest correct answer counts
 			case "multifirst":
@@ -572,70 +573,70 @@ buzz.on("buttondown",function(event) {
 				   event.button != "red") {
 					
 					// Register pushed button
-					state.selectedButtons[event.controllerId] = event.button
-					state.numberOfReplies++
-					state.speedSequence[event.controllerId] = state.numberOfReplies
+					state.selectedButtons[event.controllerId] = event.button;
+					state.numberOfReplies++;
+					state.speedSequence[event.controllerId] = state.numberOfReplies;
 					
 					if(state.currentQuestion.scoreArray[0] != null && state.currentQuestion.questionMode != "multisteal") {
 						// All players can submit a correct question
-						if(event.button == colorCode[state.currentQuestion.solution]) {
-							state.correct[event.controllerId] = true
-							let score = 0
-							let scoreIndex = -1
+						if(event.button == COLORCODE[state.currentQuestion.solution]) {
+							state.correct[event.controllerId] = true;
+							let score = 0;
+							let scoreIndex = -1;
 							for(let i = 1; i <= state.numberOfReplies; i++) {
 								if(state.correct[state.speedSequence.indexOf(i)]) {
-									scoreIndex++
+									scoreIndex++;
 								}
 							}
 							if(scoreIndex < state.currentQuestion.scoreArray.length) {
 								// Select element in scoreArray that matches position
-								score = state.currentQuestion.scoreArray[scoreIndex]
+								score = state.currentQuestion.scoreArray[scoreIndex];
 							} else {
 								// Select last element from scoreArray
-								score = state.currentQuestion.scoreArray[state.currentQuestion.scoreArray.length - 1]
+								score = state.currentQuestion.scoreArray[state.currentQuestion.scoreArray.length - 1];
 							}
-							state.scoresDelta[event.controllerId] = parseInt(score)
+							state.scoresDelta[event.controllerId] = parseInt(score);
 						} else {
 							if(state.currentQuestion.scoreMinus) {
-								state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+								state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus);
 							}
 						}				
 					} else {
 						// One player has submitted a correct answer and all stops
-						if(event.button == colorCode[state.currentQuestion.solution]) {
-							state.correct[event.controllerId] = true
+						if(event.button == COLORCODE[state.currentQuestion.solution]) {
+							state.correct[event.controllerId] = true;
 							if(state.currentQuestion.questionMode != "multisteal") {
-								state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+								state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score);
 							}
-							evaluateQuestion()
+							evaluateQuestion();
 						}
 					}
 					
 					// Turn red light off
-					state.lightState[event.controllerId] = false
+					state.lightState[event.controllerId] = false;
 					
 					// Update status
-					sendStatus()
+					sendStatus();
 					
 					// All players have submitted their answer, all are wrong
 					if(state.numberOfReplies == state.numberOfPlayers) {
-						evaluateQuestion()
+						evaluateQuestion();
 					}
 				} else if(state.modus == "results" &&
 						  event.controllerId == winnerIndex &&
 						  event.button == "red") {
-					emitLight = false
-					let looserIndex = flash
-					let booty = parseInt(state.scores[looserIndex] * 0.2)
-					state.scoresDelta[looserIndex] = -booty
+					emitLight = false;
+					let looserIndex = flash;
+					let booty = parseInt(state.scores[looserIndex] * 0.2);
+					state.scoresDelta[looserIndex] = -booty;
 					if(winnerIndex == looserIndex) {
-						util.log("Player " + (looserIndex + 1) + " looses.")					
+						util.log("Player " + (looserIndex + 1) + " looses.");					
 					} else {					
-						state.scoresDelta[winnerIndex] = booty
-						util.log("Player " + (looserIndex + 1) + " looses from player " + (winnerIndex + 1))
+						state.scoresDelta[winnerIndex] = booty;
+						util.log("Player " + (looserIndex + 1) + " looses from player " + (winnerIndex + 1));
 					}
 				}
-				break		
+				break;		
 			
 			case "buzzer":
 				// Player pushed red button once
@@ -644,23 +645,23 @@ buzz.on("buttondown",function(event) {
 				   event.button == "red") {
 					   
 					// Register pushed button
-					state.selectedButtons[event.controllerId] = "red"
-					state.numberOfReplies++
-					state.speedSequence[event.controllerId] = state.numberOfReplies
+					state.selectedButtons[event.controllerId] = "red";
+					state.numberOfReplies++;
+					state.speedSequence[event.controllerId] = state.numberOfReplies;
 					
 					// First player to push leaves the red light on
 					if(state.numberOfReplies == 1) {
-						allLights(false)
-						state.correct[event.controllerId] = true
-						state.lightState[event.controllerId] = true
+						allLights(false);
+						state.correct[event.controllerId] = true;
+						state.lightState[event.controllerId] = true;
 					}
 					
 					// Update status 
-					sendStatus()
+					sendStatus();
 					
 					// All players have submitted their answer
 					if(state.numberOfReplies == state.numberOfPlayers) {
-						evaluateQuestion()
+						evaluateQuestion();
 					}
 				}
 				break
@@ -673,43 +674,43 @@ buzz.on("buttondown",function(event) {
 					   
 					// Register series of pushed buttons
 					if(state.selectedButtons[event.controllerId] == "none") {
-						state.selectedButtons[event.controllerId] = event.button
+						state.selectedButtons[event.controllerId] = event.button;
 					} else {
-						state.selectedButtons[event.controllerId] = state.selectedButtons[event.controllerId] + "-" + event.button
+						state.selectedButtons[event.controllerId] = state.selectedButtons[event.controllerId] + "-" + event.button;
 					}
 					
 					// Check if sequence of player inputs is complete and validate question
 					if(state.selectedButtons[event.controllerId].length == 24) {
 						if(state.selectedButtons[event.controllerId] == state.currentQuestion.solutionOrder) {
-							state.correct[event.controllerId] = true
-							state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score)
+							state.correct[event.controllerId] = true;
+							state.scoresDelta[event.controllerId] = parseInt(state.currentQuestion.score);
 						} else {
-							state.correct[event.controllerId] = false
+							state.correct[event.controllerId] = false;
 							if(state.currentQuestion.scoreMinus) {
-								state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus)
+								state.scoresDelta[event.controllerId] = -parseInt(state.currentQuestion.scoreMinus);
 							}
 						}
-						state.lightState[event.controllerId] = false
-						state.numberOfReplies++
+						state.lightState[event.controllerId] = false;
+						state.numberOfReplies++;
 					}
 					
 					// Update status
-					sendStatus()
+					sendStatus();
 					
 					// All players have submitted their answer, all are wrong
 					if(state.numberOfReplies == state.numberOfPlayers) {
-						evaluateQuestion()
+						evaluateQuestion();
 					}
 					
-					util.log("Player " + (event.controllerId + 1) + " - " + state.selectedButtons[event.controllerId] + ".")
+					util.log("Player " + (event.controllerId + 1) + " - " + state.selectedButtons[event.controllerId] + ".");
 				}
 				break
 			
 			default:
-				state.selectedButtons[event.controllerId] = event.button
-				state.lightState[event.controllerId] = true
-				buzz.light(state.lightState)
-				sendStatus()
+				state.selectedButtons[event.controllerId] = event.button;
+				state.lightState[event.controllerId] = true;
+				buzz.light(state.lightState);
+				sendStatus();
 		}
 	}
 })
@@ -721,11 +722,11 @@ buzz.on("buttonup",function(event) {
 			case "multiple":
 			case "buzzer":
 			case "inorder":
-				break
+				break;
 			default:
-				state.lightState[event.controllerId] = false
+				state.lightState[event.controllerId] = false;
 		}
-		buzz.light(state.lightState)
-		sendStatus()
+		buzz.light(state.lightState);
+		sendStatus();
 	}
 })
