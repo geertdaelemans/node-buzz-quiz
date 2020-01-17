@@ -287,7 +287,7 @@ function refreshPage() {
 					break
 				case "buzzer":
 					if(stripImageTags(state.currentQuestion.solutionBuzzer).length > 0) {
-						$("#answer").html(stripImageTags(state.currentQuestion.solutionBuzzer))
+						$("#answer").html('<div class="answerDuo">' + stripImageTags(state.currentQuestion.solutionBuzzer) + '</div>')
 					} else {
 						$("#answer").html('')
 					}

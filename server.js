@@ -505,14 +505,14 @@ function deleteQuestion(index) {
 		// Save questions list
 		storeData(questions, "questions.txt")
 		// Load current question
-		if(msg < questions.length) {
-			state.currentQuestion = questions[msg]
+		if(index < questions.length) {
+			state.currentQuestion = questions[index]
 		} else {
 			state.currentQuestion = questions[questions.length - 1]
 		}
 		sendStatus()
 		io.emit('questions', questions)
-		util.log(`Deleted question ${msg + 1}.`)		
+		util.log(`Deleted question ${index + 1}.`)		
 	}
 }
 
