@@ -74,14 +74,19 @@ var state = {
 	buzzerSounds: true
 }
 
-// Load questions
-var questions = loadData("questions.txt");
-if(!questions) {
-	questions = loadData("sample.txt");
-	storeData(questions, "questions.txt");
-	util.log(`Loading sample file.`);
+// Load question file
+function loadQuestions(name) {
+	var data = loadData(name + ".txt");
+	if(!data) {
+		data = loadData("sample.txt");
+		storeData(data, name + ".txt");
+		util.log(`Loading sample file.`);		
+	}
+	util.log(data.length + ' questions loaded.');
+	return data;
 }
-util.log(questions.length + ' questions loaded.');
+
+var questions = loadQuestions("questions");
 
 // Sending flashing inforation to client
 var emitLight = false;
