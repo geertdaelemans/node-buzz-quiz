@@ -4,6 +4,9 @@ const util = require('util');
 const Buzz = require("./buzz/buzzers.js");
 const fs = require('fs');
 
+const PORT = 3000;
+const HOST = '0.0.0.0';
+
 var audioFiles = fs.readdirSync('./public/wav/');
 
 const storeData = (data, path) => {
@@ -29,11 +32,11 @@ app.set('view engine', 'ejs');
 // Middleware
 app.use(express.static('public'));
 
-// Listen on port 3000
-server = app.listen(3000);
+// Set-up server
+const server = require('http').createServer(app);
 
 // Socket.io instantiation
-const io = require("socket.io")(server);
+const io = require('socket.io')(server);
 
 // Color Code Buzzers
 const COLORCODE = ["blue", "orange", "green", "yellow"];
@@ -735,3 +738,8 @@ buzz.on("buttonup",function(event) {
 		sendStatus();
 	}
 })
+
+// Watch port for input
+server.listen(PORT, HOST, () => {
+	util.log(`Running on http://${HOST}:${PORT}`);
+});
